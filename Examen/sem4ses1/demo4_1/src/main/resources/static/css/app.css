@@ -1,0 +1,70 @@
+body {
+    background-color: #f5f7fb;
+    min-height: 100vh;
+    display: flex;
+}
+
+.sidebar {
+    width: 260px;
+    min-height: 100vh;
+    position: fixed;
+    left: 0;
+    top: 0;
+    bottom: 0;
+}
+
+.main-content {
+    margin-left: 260px;
+    width: calc(100% - 260px);
+    min-height: 100vh;
+    background: #f5f7fb;
+}
+
+.nav-link {
+    color: rgba(255, 255, 255, 0.7);
+    border-radius: 0.5rem;
+    margin-bottom: 0.4rem;
+}
+
+.nav-link.active,
+.nav-link:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: #fff;
+}
+
+.card-dashboard {
+    border: none;
+    border-radius: 1rem;
+    box-shadow: 0 0.75rem 2rem rgba(15, 23, 42, 0.08);
+}
+
+.table thead {
+    background: #eff2f9;
+}
+
+.table thead th {
+    border-bottom: none;
+    color: #636a80;
+}
+
+.modal .form-label {
+    font-weight: 600;
+}
+
+.badge-status {
+    border-radius: 999px;
+    padding: 0.35rem 0.75rem;
+}
+
+@media (max-width: 992px) {
+    .sidebar {
+        position: static;
+        width: 100%;
+        min-height: auto;
+    }
+
+    .main-content {
+        margin-left: 0;
+        width: 100%;
+    }
+}

@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="fragments/layout :: layout_head('Dashboard')"></head>
+<body th:replace="fragments/layout :: layout(~{::section}, 'Dashboard')">
+<section>
+    <div class="row g-4 mb-4">
+        <div class="col-md-3">
+            <div class="card card-dashboard h-100">
+                <div class="card-body">
+                    <p class="text-muted mb-1">Clientes</p>
+                    <h2 class="fw-bold" th:text="${summary.totalClientes}">0</h2>
+                    <i class="bi bi-people display-6 text-primary"></i>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card card-dashboard h-100">
+                <div class="card-body">
+                    <p class="text-muted mb-1">Mascotas Registradas</p>
+                    <h2 class="fw-bold" th:text="${summary.totalMascotas}">0</h2>
+                    <i class="bi bi-paw display-6 text-success"></i>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card card-dashboard h-100">
+                <div class="card-body">
+                    <p class="text-muted mb-1">Colaboradores activos</p>
+                    <h2 class="fw-bold" th:text="${summary.totalUsuariosActivos}">0</h2>
+                    <i class="bi bi-person-gear display-6 text-warning"></i>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card card-dashboard h-100">
+                <div class="card-body">
+                    <p class="text-muted mb-1">Citas del día</p>
+                    <h2 class="fw-bold" th:text="${summary.citasHoy}">0</h2>
+                    <i class="bi bi-calendar-check display-6 text-danger"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4 mb-4">
+        <div class="col-lg-7">
+            <div class="card card-dashboard h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h5 class="mb-0">Ingresos del Mes</h5>
+                        <span class="badge bg-primary fs-6" th:text="${#numbers.formatCurrency(summary.ingresosMes, 'es_PE')}"/>
+                    </div>
+                    <canvas id="ventasChart" height="200"></canvas>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-5">
+            <div class="card card-dashboard h-100">
+                <div class="card-body">
+                    <h5 class="mb-3">Distribución de Mascotas</h5>
+                    <div th:if="${mascotasDistribucion.isEmpty()}">
+                        <p class="text-muted mb-0">Aún no hay mascotas registradas.</p>
+                    </div>
+                    <div th:if="${!mascotasDistribucion.isEmpty()}">
+                        <div th:each="mascota : ${mascotasDistribucion}" class="d-flex justify-content-between align-items-center mb-2">
+                            <span class="fw-semibold" th:text="${mascota.especie}">Perro</span>
+                            <span class="badge bg-secondary" th:text="${mascota.total}">0</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card card-dashboard">
+        <div class="card-body">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h5 class="mb-0">Próximas citas</h5>
+            </div>
+            <div th:if="${summary.proximasCitas.isEmpty()}">
+                <p class="text-muted mb-0">No hay citas próximas registradas.</p>
+            </div>
+            <ul class="list-group list-group-flush" th:if="${!summary.proximasCitas.isEmpty()}">
+                <li class="list-group-item" th:each="cita : ${summary.proximasCitas}" th:text="${cita}"></li>
+            </ul>
+        </div>
+    </div>
+</section>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.6/dist/chart.umd.min.js"></script>
+<script th:inline="javascript">
+/*<![CDATA[*/
+    const ventasData = /*[[${ventasSemana}]]*/ [];
+    const labels = ventasData.map(item => item.semana);
+    const data = ventasData.map(item => item.total);
+    const ctx = document.getElementById('ventasChart');
+    if (ctx) {
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels,
+                datasets: [{
+                    label: 'Total semanal',
+                    data,
+                    tension: 0.3,
+                    borderColor: '#6366f1',
+                    backgroundColor: 'rgba(99,102,241,0.15)',
+                    fill: true
+                }]
+            },
+            options: {
+                plugins: {legend: {display: false}},
+                scales: {y: {beginAtZero: true}}
+            }
+        });
+    }
+/*]]>*/
+</script>
+</body>
+</html>

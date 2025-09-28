@@ -1,56 +1,35 @@
 package com.sise.service;
 
-import com.sise.dto.ClienteDTO;
-import com.sise.iservice.IClienteService;
-import com.sise.mapper.ClienteMapper;
 import com.sise.model.Cliente;
 import com.sise.repository.ClienteRepository;
-
-import org.springframework.stereotype.Service;
-
-import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
-public class ClienteService implements IClienteService {
+@RequiredArgsConstructor
+@Transactional
+public class ClienteService {
 
-    private final ClienteRepository repo;
+    private final ClienteRepository clienteRepository;
 
-    public ClienteService(ClienteRepository repo) {
-        this.repo = repo;
+    @Transactional(readOnly = true)
+    public List<Cliente> findAll() {
+        return clienteRepository.findAll();
     }
 
-    @Override
-    public List<ClienteDTO> listar() {
-        return repo.findAll()
-                   .stream().map(ClienteMapper::toDTO).toList();
+    @Transactional(readOnly = true)
+    public Optional<Cliente> findById(Integer id) {
+        return clienteRepository.findById(id);
     }
 
-    @Override
-    public ClienteDTO buscarPorId(Long id) {
-        return repo.findById(id).map(ClienteMapper::toDTO).orElse(null);
+    public Cliente save(Cliente cliente) {
+        return clienteRepository.save(cliente);
     }
 
-    @Override
-    public ClienteDTO registrar(ClienteDTO dto) {
-        Cliente cliente = ClienteMapper.toEntity(dto);
-        cliente.setFechaRegistro(LocalDate.now());
-        return ClienteMapper.toDTO(repo.save(cliente));
-    }
-
-    @Override
-    public ClienteDTO actualizar(Long id, ClienteDTO dto) {
-        return repo.findById(id).map(c -> {
-            c.setNombre(dto.getNombre());
-            c.setApellido(dto.getApellido());
-            c.setTelefono(dto.getTelefono());
-            c.setCorreo(dto.getCorreo());
-            return ClienteMapper.toDTO(repo.save(c));
-        }).orElse(null);
-    }
-
-    @Override
-    public void eliminar(Long id) {
-        repo.deleteById(id);
+    public void delete(Integer id) {
+        clienteRepository.deleteById(id);
     }
 }

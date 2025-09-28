@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="fragments/layout :: layout_head('Citas')"></head>
+<body th:replace="fragments/layout :: layout(~{::section}, 'Citas')">
+<section>
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="h4 mb-0">Citas</h2>
+            <p class="text-muted">Programa y gestiona las citas con tus clientes.</p>
+        </div>
+        <button class="btn btn-primary" data-modal-target="createCitaModal" data-bs-toggle="modal"
+                data-bs-target="#createCitaModal">
+            <i class="bi bi-plus-circle me-2"></i>Nueva Cita
+        </button>
+    </div>
+
+    <div th:if="${success}" class="alert alert-success alert-dismissible fade show" role="alert">
+        <span th:text="${success}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+        <span th:text="${error}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+
+    <div class="card card-dashboard">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table align-middle">
+                    <thead>
+                    <tr>
+                        <th>Fecha</th>
+                        <th>Cliente</th>
+                        <th>Mascota</th>
+                        <th>Servicio</th>
+                        <th>Estado</th>
+                        <th></th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="item : ${citas}">
+                        <td th:text="${#temporals.format(item.fechaCita, 'dd/MM/yyyy HH:mm')}">01/05/2024</td>
+                        <td th:text="${item.cliente.nombre + ' ' + item.cliente.apellido}">Juan Pérez</td>
+                        <td th:text="${item.mascota.nombre}">Firulais</td>
+                        <td th:text="${item.servicio.nombre}">Baño</td>
+                        <td><span class="badge bg-info badge-status" th:text="${item.estado}">Pendiente</span></td>
+                        <td class="text-end">
+                            <button class="btn btn-outline-primary btn-sm me-2" data-bs-toggle="modal"
+                                    data-bs-target="#editCitaModal" data-modal-target="editCitaModal"
+                                    th:data-action="@{/citas/{id}(id=${item.id})}" data-method="put"
+                                    th:data-id="${item.id}"
+                                    th:data-cliente="${item.cliente.id}"
+                                    th:data-mascota="${item.mascota.id}"
+                                    th:data-servicio="${item.servicio.id}"
+                                    th:data-usuario="${item.usuario.id}"
+                                    th:data-fecha="${#temporals.format(item.fechaCita, 'yyyy-MM-dd''T''HH:mm')}"
+                                    th:data-estado="${item.estado}"
+                                    th:data-observaciones="${item.observaciones}">
+                                <i class="bi bi-pencil-square"></i>
+                            </button>
+                            <form th:action="@{/citas/{id}(id=${item.id})}" method="post" class="d-inline">
+                                <input type="hidden" name="_method" value="delete">
+                                <button class="btn btn-outline-danger btn-sm" type="submit"
+                                        onclick="return confirm('¿Cancelar la cita?');">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                    <tr th:if="${citas.isEmpty()}">
+                        <td colspan="6" class="text-center text-muted">No hay citas registradas</td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</section>
+
+<div class="modal fade" id="createCitaModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Nueva Cita</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form th:action="@{/citas}" th:object="${cita}" method="post">
+                <div class="modal-body">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Cliente</label>
+                            <select class="form-select" th:field="*{cliente.id}" data-field="cliente">
+                                <option value="">Seleccione</option>
+                                <option th:each="cli : ${clientes}" th:value="${cli.id}"
+                                        th:text="${cli.nombre + ' ' + cli.apellido}"></option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Mascota</label>
+                            <select class="form-select" th:field="*{mascota.id}" data-field="mascota">
+                                <option value="">Seleccione</option>
+                                <option th:each="mas : ${mascotas}" th:value="${mas.id}" th:text="${mas.nombre}"></option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Servicio</label>
+                            <select class="form-select" th:field="*{servicio.id}" data-field="servicio">
+                                <option value="">Seleccione</option>
+                                <option th:each="srv : ${servicios}" th:value="${srv.id}" th:text="${srv.nombre}"></option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Responsable</label>
+                            <select class="form-select" th:field="*{usuario.id}" data-field="usuario">
+                                <option value="">Seleccione</option>
+                                <option th:each="usr : ${usuarios}" th:value="${usr.id}" th:text="${usr.nombre}"></option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Fecha y hora</label>
+                            <input type="datetime-local" class="form-control" th:field="*{fechaCita}" data-field="fecha">
+                            <div class="invalid-feedback d-block" th:if="${#fields.hasErrors('fechaCita')}"
+                                 th:errors="*{fechaCita}"></div>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Estado</label>
+                            <select class="form-select" th:field="*{estado}" data-field="estado">
+                                <option th:each="est : ${estados}" th:value="${est}" th:text="${est}"></option>
+                            </select>
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label">Observaciones</label>
+                            <textarea class="form-control" rows="3" th:field="*{observaciones}" data-field="observaciones"></textarea>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Guardar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="editCitaModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Editar Cita</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form th:action="${cita.id} != null ? @{/citas/{id}(id=${cita.id})} : ''" th:object="${cita}" method="post">
+                <input type="hidden" name="_method" value="put">
+                <div class="modal-body">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Cliente</label>
+                            <select class="form-select" th:field="*{cliente.id}" data-field="cliente">
+                                <option value="">Seleccione</option>
+                                <option th:each="cli : ${clientes}" th:value="${cli.id}"
+                                        th:text="${cli.nombre + ' ' + cli.apellido}"></option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Mascota</label>
+                            <select class="form-select" th:field="*{mascota.id}" data-field="mascota">
+                                <option value="">Seleccione</option>
+                                <option th:each="mas : ${mascotas}" th:value="${mas.id}" th:text="${mas.nombre}"></option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Servicio</label>
+                            <select class="form-select" th:field="*{servicio.id}" data-field="servicio">
+                                <option value="">Seleccione</option>
+                                <option th:each="srv : ${servicios}" th:value="${srv.id}" th:text="${srv.nombre}"></option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Responsable</label>
+                            <select class="form-select" th:field="*{usuario.id}" data-field="usuario">
+                                <option value="">Seleccione</option>
+                                <option th:each="usr : ${usuarios}" th:value="${usr.id}" th:text="${usr.nombre}"></option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Fecha y hora</label>
+                            <input type="datetime-local" class="form-control" th:field="*{fechaCita}" data-field="fecha">
+                            <div class="invalid-feedback d-block" th:if="${#fields.hasErrors('fechaCita')}"
+                                 th:errors="*{fechaCita}"></div>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Estado</label>
+                            <select class="form-select" th:field="*{estado}" data-field="estado">
+                                <option th:each="est : ${estados}" th:value="${est}" th:text="${est}"></option>
+                            </select>
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label">Observaciones</label>
+                            <textarea class="form-control" rows="3" th:field="*{observaciones}" data-field="observaciones"></textarea>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Actualizar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+</body>
+</html>

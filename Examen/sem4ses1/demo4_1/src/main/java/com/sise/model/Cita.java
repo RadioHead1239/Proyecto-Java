@@ -2,98 +2,64 @@ package com.sise.model;
 
 import java.time.LocalDateTime;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import jakarta.validation.constraints.FutureOrPresent;
+import jakarta.validation.constraints.NotNull;
+import org.springframework.format.annotation.DateTimeFormat;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
+@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 @Entity
-@Table(name = "cita")
+@Table(name = "Cita")
 public class Cita {
+
+    public enum Estado { Pendiente, Confirmada, Cancelada, Completada }
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long idCita;
+    @Column(name = "id_cita")
+    private Long id;
 
-    @ManyToOne
-    @JoinColumn(name = "id_cliente", nullable = false)
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "id_cliente")
     private Cliente cliente;
 
-    @ManyToOne
-    @JoinColumn(name = "id_mascota", nullable = false)
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "id_mascota")
     private Mascota mascota;
 
-    @ManyToOne
-    @JoinColumn(name = "id_servicio", nullable = false)
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "id_servicio")
     private Servicio servicio;
 
-    @ManyToOne
-    @JoinColumn(name = "id_usuario", nullable = false)
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "id_usuario")
     private Usuario usuario;
 
+    @NotNull
+    @FutureOrPresent
+    @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm")
+    @Column(name = "fecha_cita", nullable = false)
     private LocalDateTime fechaCita;
 
-    private String estado;
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 20)
+    private Estado estado = Estado.Pendiente;
 
     private String observaciones;
-
-    // getters y setters
-    public Long getIdCita() {
-        return idCita;
-    }
-    public void setIdCita(Long idCita) {
-        this.idCita = idCita;
-    }
-
-    public Cliente getCliente() {
-        return cliente;
-    }
-    public void setCliente(Cliente cliente) {
-        this.cliente = cliente;
-    }
-
-    public Mascota getMascota() {
-        return mascota;
-    }
-    public void setMascota(Mascota mascota) {
-        this.mascota = mascota;
-    }
-
-    public Servicio getServicio() {
-        return servicio;
-    }
-    public void setServicio(Servicio servicio) {
-        this.servicio = servicio;
-    }
-
-    public Usuario getUsuario() {
-        return usuario;
-    }
-    public void setUsuario(Usuario usuario) {
-        this.usuario = usuario;
-    }
-
-    public LocalDateTime getFechaCita() {
-        return fechaCita;
-    }
-    public void setFechaCita(LocalDateTime fechaCita) {
-        this.fechaCita = fechaCita;
-    }
-
-    public String getEstado() {
-        return estado;
-    }
-    public void setEstado(String estado) {
-        this.estado = estado;
-    }
-
-    public String getObservaciones() {
-        return observaciones;
-    }
-    public void setObservaciones(String observaciones) {
-        this.observaciones = observaciones;
-    }
 }

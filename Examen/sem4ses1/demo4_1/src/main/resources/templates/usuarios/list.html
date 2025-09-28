@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="fragments/layout :: layout_head('Usuarios')"></head>
+<body th:replace="fragments/layout :: layout(~{::section}, 'Usuarios')">
+<section>
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="h4 mb-0">Usuarios</h2>
+            <p class="text-muted">Administra los usuarios y roles del sistema.</p>
+        </div>
+        <button class="btn btn-primary" data-modal-target="createUsuarioModal" data-bs-toggle="modal"
+                data-bs-target="#createUsuarioModal">
+            <i class="bi bi-plus-circle me-2"></i>Nuevo Usuario
+        </button>
+    </div>
+
+    <div th:if="${success}" class="alert alert-success alert-dismissible fade show" role="alert">
+        <span th:text="${success}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+        <span th:text="${error}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+
+    <div class="card card-dashboard">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table align-middle">
+                    <thead>
+                    <tr>
+                        <th>Nombre</th>
+                        <th>Correo</th>
+                        <th>Rol</th>
+                        <th>Estado</th>
+                        <th></th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="item : ${usuarios}">
+                        <td th:text="${item.nombre}">Administrador</td>
+                        <td th:text="${item.correo}">correo@correo.com</td>
+                        <td><span class="badge bg-primary" th:text="${item.rol}">Administrador</span></td>
+                        <td>
+                            <span class="badge" th:classappend="${item.estado}? 'bg-success' : 'bg-secondary'"
+                                  th:text="${item.estado ? 'Activo' : 'Inactivo'}"></span>
+                        </td>
+                        <td class="text-end">
+                            <button class="btn btn-outline-primary btn-sm me-2" data-bs-toggle="modal"
+                                    data-bs-target="#editUsuarioModal" data-modal-target="editUsuarioModal"
+                                    th:data-action="@{/usuarios/{id}(id=${item.id})}" data-method="put"
+                                    th:data-id="${item.id}"
+                                    th:data-nombre="${item.nombre}"
+                                    th:data-correo="${item.correo}"
+                                    th:data-rol="${item.rol}"
+                                    th:data-estado="${item.estado}">
+                                <i class="bi bi-pencil-square"></i>
+                            </button>
+                            <form th:action="@{/usuarios/{id}(id=${item.id})}" method="post" class="d-inline">
+                                <input type="hidden" name="_method" value="delete">
+                                <button class="btn btn-outline-danger btn-sm" type="submit"
+                                        onclick="return confirm('¿Eliminar este usuario?');">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                    <tr th:if="${usuarios.isEmpty()}">
+                        <td colspan="5" class="text-center text-muted">No hay usuarios registrados</td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</section>
+
+<div class="modal fade" id="createUsuarioModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Nuevo Usuario</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form th:action="@{/usuarios}" th:object="${usuario}" method="post">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">Nombre</label>
+                        <input class="form-control" th:field="*{nombre}" data-field="nombre">
+                        <div class="invalid-feedback d-block" th:if="${#fields.hasErrors('nombre')}" th:errors="*{nombre}"></div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Correo</label>
+                        <input class="form-control" th:field="*{correo}" data-field="correo">
+                        <div class="invalid-feedback d-block" th:if="${#fields.hasErrors('correo')}" th:errors="*{correo}"></div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Contraseña</label>
+                        <input type="password" class="form-control" th:field="*{password}" data-field="password">
+                        <div class="invalid-feedback d-block" th:if="${#fields.hasErrors('password')}" th:errors="*{password}"></div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Rol</label>
+                        <select class="form-select" th:field="*{rol}" data-field="rol">
+                            <option th:each="rol : ${roles}" th:value="${rol}" th:text="${rol}"></option>
+                        </select>
+                    </div>
+                    <div class="form-check form-switch">
+                        <input class="form-check-input" type="checkbox" th:field="*{estado}" data-field="estado">
+                        <label class="form-check-label">Activo</label>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Guardar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="editUsuarioModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Editar Usuario</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form th:action="${usuario.id} != null ? @{/usuarios/{id}(id=${usuario.id})} : ''" th:object="${usuario}" method="post">
+                <input type="hidden" name="_method" value="put">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">Nombre</label>
+                        <input class="form-control" th:field="*{nombre}" data-field="nombre">
+                        <div class="invalid-feedback d-block" th:if="${#fields.hasErrors('nombre')}" th:errors="*{nombre}"></div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Correo</label>
+                        <input class="form-control" th:field="*{correo}" data-field="correo">
+                        <div class="invalid-feedback d-block" th:if="${#fields.hasErrors('correo')}" th:errors="*{correo}"></div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Contraseña</label>
+                        <input type="password" class="form-control" th:field="*{password}" data-field="password">
+                        <div class="invalid-feedback d-block" th:if="${#fields.hasErrors('password')}" th:errors="*{password}"></div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Rol</label>
+                        <select class="form-select" th:field="*{rol}" data-field="rol">
+                            <option th:each="rol : ${roles}" th:value="${rol}" th:text="${rol}"></option>
+                        </select>
+                    </div>
+                    <div class="form-check form-switch">
+                        <input class="form-check-input" type="checkbox" th:field="*{estado}" data-field="estado">
+                        <label class="form-check-label">Activo</label>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Actualizar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+</body>
+</html>

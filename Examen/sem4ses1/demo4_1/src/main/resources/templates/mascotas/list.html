@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="fragments/layout :: layout_head('Mascotas')"></head>
+<body th:replace="fragments/layout :: layout(~{::section}, 'Mascotas')">
+<section>
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="h4 mb-0">Mascotas</h2>
+            <p class="text-muted">Controla las mascotas registradas y sus dueños.</p>
+        </div>
+        <button class="btn btn-primary" data-modal-target="createMascotaModal" data-bs-toggle="modal"
+                data-bs-target="#createMascotaModal">
+            <i class="bi bi-plus-circle me-2"></i>Nueva Mascota
+        </button>
+    </div>
+
+    <div th:if="${success}" class="alert alert-success alert-dismissible fade show" role="alert">
+        <span th:text="${success}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+        <span th:text="${error}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+
+    <div class="card card-dashboard">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table align-middle">
+                    <thead>
+                    <tr>
+                        <th>Nombre</th>
+                        <th>Especie</th>
+                        <th>Raza</th>
+                        <th>Dueño</th>
+                        <th></th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="item : ${mascotas}">
+                        <td th:text="${item.nombre}">Firulais</td>
+                        <td th:text="${item.especie}">Perro</td>
+                        <td th:text="${item.raza}">Pug</td>
+                        <td th:text="${item.cliente.nombre + ' ' + item.cliente.apellido}">Juan Pérez</td>
+                        <td class="text-end">
+                            <button class="btn btn-outline-primary btn-sm me-2"
+                                    data-bs-toggle="modal" data-bs-target="#editMascotaModal"
+                                    data-modal-target="editMascotaModal"
+                                    th:data-action="@{/mascotas/{id}(id=${item.id})}"
+                                    data-method="put"
+                                    th:data-id="${item.id}"
+                                    th:data-nombre="${item.nombre}"
+                                    th:data-cliente="${item.cliente.id}"
+                                    th:data-especie="${item.especie}"
+                                    th:data-raza="${item.raza}"
+                                    th:data-edad="${item.edad}"
+                                    th:data-peso="${item.peso}"
+                                    th:data-observaciones="${item.observaciones}">
+                                <i class="bi bi-pencil-square"></i>
+                            </button>
+                            <form th:action="@{/mascotas/{id}(id=${item.id})}" method="post" class="d-inline">
+                                <input type="hidden" name="_method" value="delete">
+                                <button class="btn btn-outline-danger btn-sm" type="submit"
+                                        onclick="return confirm('¿Desea eliminar esta mascota?');">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                    <tr th:if="${mascotas.isEmpty()}">
+                        <td colspan="5" class="text-center text-muted">No hay mascotas registradas</td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</section>
+
+<div class="modal fade" id="createMascotaModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Nueva Mascota</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form th:action="@{/mascotas}" th:object="${mascota}" method="post">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">Nombre</label>
+                        <input class="form-control" th:field="*{nombre}" data-field="nombre">
+                        <div class="invalid-feedback d-block" th:if="${#fields.hasErrors('nombre')}"
+                             th:errors="*{nombre}"></div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Cliente</label>
+                        <select class="form-select" th:field="*{cliente.id}" data-field="cliente">
+                            <option value="">Seleccione</option>
+                            <option th:each="cli : ${clientes}" th:value="${cli.id}" th:text="${cli.nombre + ' ' + cli.apellido}"></option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Especie</label>
+                        <select class="form-select" th:field="*{especie}" data-field="especie">
+                            <option value="">Seleccione</option>
+                            <option th:each="esp : ${especies}" th:value="${esp}" th:text="${esp}"></option>
+                        </select>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Raza</label>
+                            <input class="form-control" th:field="*{raza}" data-field="raza">
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <label class="form-label">Edad</label>
+                            <input type="number" min="0" class="form-control" th:field="*{edad}" data-field="edad">
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <label class="form-label">Peso (kg)</label>
+                            <input type="number" step="0.1" min="0" class="form-control" th:field="*{peso}" data-field="peso">
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Observaciones</label>
+                        <textarea class="form-control" rows="3" th:field="*{observaciones}" data-field="observaciones"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Guardar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="editMascotaModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Editar Mascota</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form th:action="${mascota.id} != null ? @{/mascotas/{id}(id=${mascota.id})} : ''" th:object="${mascota}" method="post">
+                <input type="hidden" name="_method" value="put">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">Nombre</label>
+                        <input class="form-control" th:field="*{nombre}" data-field="nombre">
+                        <div class="invalid-feedback d-block" th:if="${#fields.hasErrors('nombre')}"
+                             th:errors="*{nombre}"></div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Cliente</label>
+                        <select class="form-select" th:field="*{cliente.id}" data-field="cliente">
+                            <option value="">Seleccione</option>
+                            <option th:each="cli : ${clientes}" th:value="${cli.id}" th:text="${cli.nombre + ' ' + cli.apellido}"></option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Especie</label>
+                        <select class="form-select" th:field="*{especie}" data-field="especie">
+                            <option value="">Seleccione</option>
+                            <option th:each="esp : ${especies}" th:value="${esp}" th:text="${esp}"></option>
+                        </select>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Raza</label>
+                            <input class="form-control" th:field="*{raza}" data-field="raza">
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <label class="form-label">Edad</label>
+                            <input type="number" min="0" class="form-control" th:field="*{edad}" data-field="edad">
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <label class="form-label">Peso (kg)</label>
+                            <input type="number" step="0.1" min="0" class="form-control" th:field="*{peso}" data-field="peso">
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Observaciones</label>
+                        <textarea class="form-control" rows="3" th:field="*{observaciones}" data-field="observaciones"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Actualizar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+</body>
+</html>

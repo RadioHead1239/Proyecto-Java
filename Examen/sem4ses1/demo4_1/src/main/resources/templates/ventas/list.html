@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="fragments/layout :: layout_head('Ventas')"></head>
+<body th:replace="fragments/layout :: layout(~{::section}, 'Ventas')">
+<section>
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="h4 mb-0">Ventas</h2>
+            <p class="text-muted">Registra la venta de productos y servicios complementarios.</p>
+        </div>
+        <button class="btn btn-primary" data-modal-target="createVentaModal" data-bs-toggle="modal"
+                data-bs-target="#createVentaModal">
+            <i class="bi bi-plus-circle me-2"></i>Nueva Venta
+        </button>
+    </div>
+
+    <div th:if="${success}" class="alert alert-success alert-dismissible fade show" role="alert">
+        <span th:text="${success}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+        <span th:text="${error}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+
+    <div class="card card-dashboard">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table align-middle">
+                    <thead>
+                    <tr>
+                        <th>Fecha</th>
+                        <th>Cliente</th>
+                        <th>Detalle</th>
+                        <th>Total</th>
+                        <th></th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="item : ${ventas}">
+                        <td th:text="${#temporals.format(item.fecha, 'dd/MM/yyyy HH:mm')}">01/05/2024</td>
+                        <td th:text="${item.cliente.nombre + ' ' + item.cliente.apellido}">Cliente</td>
+                        <td>
+                            <ul class="list-unstyled mb-0">
+                                <li th:each="det : ${item.detalles}" th:text="${det.cantidad + 'x ' + det.producto.nombre}"></li>
+                            </ul>
+                        </td>
+                        <td th:text="${#numbers.formatCurrency(item.total, 'es_PE')}">S/ 100.00</td>
+                        <td class="text-end">
+                            <button class="btn btn-outline-primary btn-sm me-2" data-bs-toggle="modal"
+                                    data-bs-target="#editVentaModal" data-modal-target="editVentaModal"
+                                    th:data-action="@{/ventas/{id}(id=${item.id})}" data-method="put"
+                                    th:data-id="${item.id}"
+                                    th:data-cliente="${item.cliente.id}"
+                                    th:data-producto="${item.detalles[0].producto.id}"
+                                    th:data-cantidad="${item.detalles[0].cantidad}"
+                                    th:data-total="${item.total}">
+                                <i class="bi bi-pencil-square"></i>
+                            </button>
+                            <form th:action="@{/ventas/{id}(id=${item.id})}" method="post" class="d-inline">
+                                <input type="hidden" name="_method" value="delete">
+                                <button class="btn btn-outline-danger btn-sm" type="submit"
+                                        onclick="return confirm('¿Eliminar esta venta?');">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                    <tr th:if="${ventas.isEmpty()}">
+                        <td colspan="5" class="text-center text-muted">No hay ventas registradas</td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</section>
+
+<div class="modal fade" id="createVentaModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Registrar Venta</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form th:action="@{/ventas}" th:object="${venta}" method="post">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">Cliente</label>
+                        <select class="form-select" th:field="*{cliente.id}" data-field="cliente">
+                            <option value="">Seleccione</option>
+                            <option th:each="cli : ${clientes}" th:value="${cli.id}" th:text="${cli.nombre + ' ' + cli.apellido}"></option>
+                        </select>
+                    </div>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Producto</label>
+                            <select class="form-select" th:field="*{detalles[0].producto.id}" data-field="producto">
+                                <option value="">Seleccione</option>
+                                <option th:each="prod : ${productos}" th:value="${prod.id}" th:text="${prod.nombre}"></option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Cantidad</label>
+                            <input type="number" min="1" class="form-control" th:field="*{detalles[0].cantidad}" data-field="cantidad">
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Guardar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="editVentaModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Editar Venta</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form th:action="${venta.id} != null ? @{/ventas/{id}(id=${venta.id})} : ''" th:object="${venta}" method="post">
+                <input type="hidden" name="_method" value="put">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">Cliente</label>
+                        <select class="form-select" th:field="*{cliente.id}" data-field="cliente">
+                            <option value="">Seleccione</option>
+                            <option th:each="cli : ${clientes}" th:value="${cli.id}" th:text="${cli.nombre + ' ' + cli.apellido}"></option>
+                        </select>
+                    </div>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Producto</label>
+                            <select class="form-select" th:field="*{detalles[0].producto.id}" data-field="producto">
+                                <option value="">Seleccione</option>
+                                <option th:each="prod : ${productos}" th:value="${prod.id}" th:text="${prod.nombre}"></option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Cantidad</label>
+                            <input type="number" min="1" class="form-control" th:field="*{detalles[0].cantidad}" data-field="cantidad">
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Actualizar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+</body>
+</html>
