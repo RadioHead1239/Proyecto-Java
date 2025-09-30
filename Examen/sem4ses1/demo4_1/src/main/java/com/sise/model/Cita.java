@@ -1,99 +1,57 @@
 package com.sise.model;
 
+import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import java.time.LocalDateTime;
-
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.Table;
+import java.util.List;
 
 @Entity
 @Table(name = "cita")
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class Cita {
-
+    
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long idCita;
-
-    @ManyToOne
+    @Column(name = "id_cita")
+    private Long id;
+    
+    @Column(name = "fecha_cita", nullable = false)
+    private LocalDateTime fechaCita;
+    
+    @Enumerated(EnumType.STRING)
+    @Column(name = "estado", nullable = false)
+    private Estado estado = Estado.Pendiente;
+    
+    @Column(name = "observaciones", columnDefinition = "TEXT")
+    private String observaciones;
+    
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_cliente", nullable = false)
     private Cliente cliente;
-
-    @ManyToOne
+    
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_mascota", nullable = false)
     private Mascota mascota;
-
-    @ManyToOne
+    
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_servicio", nullable = false)
     private Servicio servicio;
-
-    @ManyToOne
+    
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_usuario", nullable = false)
     private Usuario usuario;
-
-    private LocalDateTime fechaCita;
-
-    private String estado;
-
-    private String observaciones;
-
-    // getters y setters
-    public Long getIdCita() {
-        return idCita;
-    }
-    public void setIdCita(Long idCita) {
-        this.idCita = idCita;
-    }
-
-    public Cliente getCliente() {
-        return cliente;
-    }
-    public void setCliente(Cliente cliente) {
-        this.cliente = cliente;
-    }
-
-    public Mascota getMascota() {
-        return mascota;
-    }
-    public void setMascota(Mascota mascota) {
-        this.mascota = mascota;
-    }
-
-    public Servicio getServicio() {
-        return servicio;
-    }
-    public void setServicio(Servicio servicio) {
-        this.servicio = servicio;
-    }
-
-    public Usuario getUsuario() {
-        return usuario;
-    }
-    public void setUsuario(Usuario usuario) {
-        this.usuario = usuario;
-    }
-
-    public LocalDateTime getFechaCita() {
-        return fechaCita;
-    }
-    public void setFechaCita(LocalDateTime fechaCita) {
-        this.fechaCita = fechaCita;
-    }
-
-    public String getEstado() {
-        return estado;
-    }
-    public void setEstado(String estado) {
-        this.estado = estado;
-    }
-
-    public String getObservaciones() {
-        return observaciones;
-    }
-    public void setObservaciones(String observaciones) {
-        this.observaciones = observaciones;
+    
+    @OneToMany(mappedBy = "cita", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<Pago> pagos;
+    
+    @OneToOne(mappedBy = "cita", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private Venta venta;
+    
+    public enum Estado {
+        Pendiente, Confirmada, Cancelada, Completada
     }
 }

@@ -1,79 +1,45 @@
 package com.sise.model;
 
+import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import java.math.BigDecimal;
 import java.util.List;
-
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.OneToMany;
-import jakarta.persistence.Table;
 
 @Entity
 @Table(name = "servicio")
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class Servicio {
+    
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id_servicio")
-    private Integer idServicio;
-
+    private Long id;
+    
+    @Column(name = "nombre", nullable = false, length = 100)
     private String nombre;
+    
+    @Column(name = "descripcion", columnDefinition = "TEXT")
     private String descripcion;
-    private Double precio;
-
-    @Column(name = "duracion_minutos")
+    
+    @Column(name = "precio", nullable = false, precision = 10, scale = 2)
+    private BigDecimal precio;
+    
+    @Column(name = "duracion_minutos", nullable = false)
     private Integer duracionMinutos;
-
-    @OneToMany(mappedBy = "servicio")
+    
+    @Column(name = "imagen", length = 255)
+    private String imagen;
+    
+    @Column(name = "categoria", length = 50)
+    private String categoria;
+    
+    @Column(name = "activo", nullable = false)
+    private Boolean activo = true;
+    
+    @OneToMany(mappedBy = "servicio", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Cita> citas;
-
-    public Integer getIdServicio() {
-        return idServicio;
-    }
-
-    public void setIdServicio(Integer idServicio) {
-        this.idServicio = idServicio;
-    }
-
-    public String getNombre() {
-        return nombre;
-    }
-
-    public void setNombre(String nombre) {
-        this.nombre = nombre;
-    }
-
-    public String getDescripcion() {
-        return descripcion;
-    }
-
-    public void setDescripcion(String descripcion) {
-        this.descripcion = descripcion;
-    }
-
-    public Double getPrecio() {
-        return precio;
-    }
-
-    public void setPrecio(Double precio) {
-        this.precio = precio;
-    }
-
-    public Integer getDuracionMinutos() {
-        return duracionMinutos;
-    }
-
-    public void setDuracionMinutos(Integer duracionMinutos) {
-        this.duracionMinutos = duracionMinutos;
-    }
-
-    public List<Cita> getCitas() {
-        return citas;
-    }
-
-    public void setCitas(List<Cita> citas) {
-        this.citas = citas;
-    }
-
 }

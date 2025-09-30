@@ -1,64 +1,702 @@
-
 <!doctype html>
 <html lang="es" xmlns:th="http://www.thymeleaf.org">
 <head>
-	<meta charset="utf-8" />
-	<meta name="viewport" content="width=device-width, initial-scale=1" />
-	<title>Clientes · Dashboard</title>
-	<!-- Bootstrap & Icons -->
-	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-	<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
-	<style>
-		:root{ --brand:#0066cc; --brand-2:#00bcd4; } /* ===== SIDEBAR ===== */ .sidebar{ position:fixed; inset-block:0; inset-inline-start:0; width:260px; background:#0b1220; color:#d9e1f2; z-index:1030; overflow-y:auto; } .sidebar .nav-link{ color:#a7b1cc; border-radius:.6rem; } .sidebar .nav-link.active{ background:linear-gradient(135deg, var(--brand), var(--brand-2)); color:#fff; } .sidebar .nav-link:hover{ color:#fff; background:rgba(255,255,255,.06); } .brand{ color:#fff; font-weight:700; letter-spacing:.5px; } .brand small{ color:#7bb6ff; font-weight:500; } .avatar{ width:36px; height:36px; border-radius:50%; object-fit:cover; } /* ===== CONTENT ===== */ .content{ margin-inline-start:260px; min-height:100vh; } .content .topbar{ position:sticky; top:0; z-index:1020; backdrop-filter:saturate(180%) blur(6px); background:rgba(246,248,251,.8); } body { background:#f6f8fb; font-family:"Poppins",sans-serif; } .content { margin-inline-start:260px; min-height:100vh; } .topbar { position:sticky; top:0; z-index:1020; backdrop-filter:saturate(180%) blur(6px); background:rgba(246,248,251,.8); } .card { border-radius:1rem; box-shadow:0 4px 12px rgba(0,0,0,.08); } .btn-primary { background:linear-gradient(135deg,#0066cc,#00bcd4); border:0; } .btn-primary:hover { background:linear-gradient(135deg,#005bb5,#00a2b3); }
-	</style>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Inventario Veterinario · VetCare</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11.12.4/dist/sweetalert2.min.css" rel="stylesheet">
+  <link href="/css/global.css" rel="stylesheet">
+  
+  <style>
+    .card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 8px 25px rgba(0,0,0,0.15) !important;
+    }
+    
+    .card-img-top:hover img {
+      transform: scale(1.05);
+    }
+    
+    .badge-stock {
+      font-size: 0.75rem;
+      padding: 0.375rem 0.75rem;
+    }
+    
+    .btn-group-sm .btn {
+      padding: 0.25rem 0.5rem;
+      font-size: 0.875rem;
+    }
+    
+    .text-truncate {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+  </style>
+  
+  <style>
+     :root {
+      --sidebar-bg: linear-gradient(180deg, #84cddb, #b4dadf);
+      --sidebar-hover: rgba(255, 255, 255, 0.15);
+      --sidebar-active: linear-gradient(135deg, #4facfe, #00f2fe);
+      --text-color: #ffffff;
+    }
+  
+    /* Sidebar */
+    .sidebar {
+      position: fixed;
+      inset-block: 0;
+      inset-inline-start: 0;
+      width: 260px;
+      background: var(--sidebar-bg);
+      color: var(--text-color);
+      z-index: 1030;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      border-right: 3px solid rgba(255,255,255,0.1);
+    }
+  
+    /* Logo */
+    .brand-logo {
+      width: 90%;
+      border-radius: 20px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+      transition: transform .3s ease;
+    }
+    .brand-logo:hover {
+      transform: scale(1.05);
+    }
+  
+    /* Menú */
+    .sidebar .nav-link {
+      color: var(--text-color);
+      border-radius: .6rem;
+      padding: .65rem 1rem;
+      display: flex;
+      align-items: center;
+      gap: .6rem;
+      transition: all .2s;
+      font-weight: 500;
+    }
+  
+    .sidebar .nav-link:hover {
+      background: var(--sidebar-hover);
+    }
+  
+    .sidebar .nav-link.active {
+      background: var(--sidebar-active);
+      color: #fff;
+      box-shadow: 0 2px 8px rgba(0,0,0,.3);
+    }
+  
+    /* Footer */
+    .sidebar-footer {
+      padding: 1rem;
+      font-size: .85rem;
+      color: rgba(255,255,255,.8);
+      border-top: 1px solid rgba(255,255,255,.2);
+    }
+  </style>
 </head>
 <body>
-	<aside class="sidebar d-flex flex-column p-3">
-		<a href="/dashboard" class="d-flex align-items-center mb-3 text-decoration-none"> <i class="bi bi-scissors text-primary fs-3 me-2"></i> <span class="brand fs-5">Peluquería <small>Mascotas</small></span> </a>
-		<hr>
-		<ul class="nav nav-pills flex-column mb-auto">
-			<li><a href="/dashboard" class="nav-link active"><i class="bi bi-speedometer2 me-2"></i> Dashboard</a></li>
-			<li><a href="/cliente" class="nav-link"><i class="bi bi-people me-2"></i> Clientes</a></li>
-			<li><a href="/mascota" class="nav-link"><i class="bi bi-bag-heart me-2"></i> Mascotas</a></li>
-			<li><a href="/cita" class="nav-link"><i class="bi bi-calendar2-week me-2"></i> Citas</a></li>
-			<li><a href="/venta" class="nav-link"><i class="bi bi-receipt me-2"></i> Ventas</a></li>
-			<li><a href="/producto" class="nav-link"><i class="bi bi-box-seam me-2"></i> Productos</a></li>
-			<li><a href="/usuario" class="nav-link"><i class="bi bi-person-gear me-2"></i> Usuarios</a></li>
-		</ul>
-		<hr>
-		<div class="dropdown">
-			<a href="#" class="d-flex align-items-center text-decoration-none dropdown-toggle" data-bs-toggle="dropdown"> <img src="https://i.pravatar.cc/40" alt="user" class="avatar me-2"> <strong>Admin</strong> </a>
-			<ul class="dropdown-menu dropdown-menu-dark shadow">
-				<li><a class="dropdown-item" href="#">Perfil</a></li>
-				<li><a class="dropdown-item" href="#">Configuración</a></li>
-				<li>
-					<hr class="dropdown-divider">
-				</li>
-				<li><a class="dropdown-item" href="#">Cerrar sesión</a></li>
-			</ul>
-		</div>
-	</aside>
-	
-	<section id="view-productos" class="app-view">
-  <div class="d-flex justify-content-between mb-3">
-    <h5><i class="bi bi-box-seam me-2"></i>Productos</h5>
-    <button class="btn btn-primary"><i class="bi bi-plus-lg"></i> Nuevo Producto</button>
+  
+   
+<aside class="sidebar d-flex flex-column p-3">
+  
+  <div class="brand mb-4 text-center">
+    <img src="https://marketplace.canva.com/EAGre3wkiKc/1/0/1600w/canva-logotipo-veterinaria-ilustrado-lindo-azul-aqua-beige-g5Mq7lvYdmg.jpg" 
+         alt="VetCare Logo" 
+         class="brand-logo">
   </div>
-  <div class="card shadow-sm">
-    <div class="table-responsive">
-      <table class="table table-striped align-middle">
-        <thead class="table-light">
-          <tr>
-            <th>Producto</th><th>Precio</th><th>Stock</th><th>Fecha</th><th>Acciones</th>
-          </tr>
-        </thead>
-        <tbody id="tbodyProductos"></tbody>
-      </table>
+
+  
+  <ul class="nav flex-column gap-1">
+    <li><a href="/dashboard" class="nav-link"><i class="bi bi-speedometer2 me-2"></i>Dashboard</a></li>
+    <li><a href="/cliente" class="nav-link"><i class="bi bi-people me-2"></i>Clientes</a></li>
+    <li><a href="/mascota" class="nav-link"><i class="bi bi-bag-heart me-2"></i>Mascotas</a></li>
+    <li><a href="/cita" class="nav-link"><i class="bi bi-calendar2-week me-2"></i>Citas</a></li>
+    <li><a href="/venta" class="nav-link"><i class="bi bi-receipt me-2"></i>Ventas</a></li>
+    <li><a href="/producto" class="nav-link"><i class="bi bi-box-seam me-2"></i>Productos</a></li>
+    <li><a href="/usuario" class="nav-link"><i class="bi bi-person-gear me-2"></i>Usuarios</a></li>
+    <li><a href="/pago" class="nav-link"><i class="bi bi-cash-coin me-2"></i>Pagos</a></li>
+    <li><a href="/servicio" class="nav-link"><i class="bi bi-scissors me-2"></i>Servicios</a></li>
+  </ul>
+
+  
+  <div class="sidebar-footer mt-auto text-center small">
+    © 2025 VetCare
+  </div>
+</aside>
+
+  
+  <main class="content">
+    <div class="topbar d-flex align-items-center justify-content-between">
+      <div>
+        <h5 class="mb-0"><i class="bi bi-heart-pulse me-2"></i>Inventario Veterinario</h5>
+        <small class="text-muted">Administra productos y medicamentos veterinarios</small>
+      </div>
+      <div class="d-flex gap-2">
+        <button class="btn btn-success btn-sm" data-bs-toggle="modal" data-bs-target="#productoModal">
+          <i class="bi bi-plus-lg me-1"></i> Nuevo Producto
+        </button>
+      </div>
+    </div>
+
+    <div class="container-fluid py-4">
+      
+      <div class="card mb-4">
+        <div class="card-body">
+          <div class="row g-3">
+            <div class="col-md-3">
+              <label class="form-label">Buscar producto</label>
+              <div class="input-group">
+                <span class="input-group-text"><i class="bi bi-search"></i></span>
+                <input type="text" class="form-control" id="searchInput" placeholder="Nombre, marca, categoría...">
+              </div>
+            </div>
+            <div class="col-md-2">
+              <label class="form-label">Categoría</label>
+              <select class="form-select" id="categoriaFilter">
+                <option value="">Todas</option>
+                <option value="Alimentación">Alimentación</option>
+                <option value="Higiene">Higiene</option>
+                <option value="Juguetes">Juguetes</option>
+                <option value="Accesorios">Accesorios</option>
+                <option value="Medicina">Medicina</option>
+              </select>
+            </div>
+            <div class="col-md-2">
+              <label class="form-label">Stock</label>
+              <select class="form-select" id="stockFilter">
+                <option value="">Todos</option>
+                <option value="bajo">Stock bajo</option>
+                <option value="normal">Stock normal</option>
+                <option value="agotado">Agotado</option>
+              </select>
+            </div>
+            <div class="col-md-2">
+              <label class="form-label">Estado</label>
+              <select class="form-select" id="estadoFilter">
+                <option value="">Todos</option>
+                <option value="activo">Activo</option>
+                <option value="inactivo">Inactivo</option>
+              </select>
+            </div>
+            <div class="col-md-2 d-flex align-items-end">
+              <button class="btn btn-outline-secondary w-100" onclick="limpiarFiltros()">
+                <i class="bi bi-arrow-clockwise me-1"></i> Limpiar
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      
+      <div class="row g-4" id="productosGrid">
+        
+      </div>
+
+      
+      <div class="card d-none" id="tablaProductos">
+        <div class="card-header d-flex justify-content-between align-items-center">
+          <h6 class="mb-0"><i class="bi bi-list-ul me-2"></i>Lista de Productos</h6>
+          <div class="btn-group btn-group-sm">
+            <button class="btn btn-outline-primary active" onclick="toggleVista('grid')">
+              <i class="bi bi-grid-3x3-gap"></i> Tarjetas
+            </button>
+            <button class="btn btn-outline-primary" onclick="toggleVista('table')">
+              <i class="bi bi-table"></i> Tabla
+            </button>
+          </div>
+        </div>
+        <div class="card-body p-0">
+          <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+              <thead class="table-light">
+                <tr>
+                  <th width="5%">ID</th>
+                  <th width="20%">Producto</th>
+                  <th width="15%">Categoría</th>
+                  <th width="10%">Precio</th>
+                  <th width="10%">Stock</th>
+                  <th width="15%">Marca</th>
+                  <th width="15%">Fecha</th>
+                  <th width="10%" class="text-center">Acciones</th>
+                </tr>
+              </thead>
+              <tbody id="tbodyProductos">
+                
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  
+  <div class="modal fade" id="productoModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+      <div class="modal-content">
+        <form id="formProducto">
+          <div class="modal-header bg-success text-white">
+            <h5 class="modal-title">
+              <i class="bi bi-heart-pulse me-2"></i>
+              <span id="modalTitle">Nuevo Producto</span>
+            </h5>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+          </div>
+          <div class="modal-body">
+            <div class="row g-3">
+              <div class="col-md-6">
+                <label class="form-label">Nombre <span class="text-danger">*</span></label>
+                <input type="text" class="form-control" name="nombre" id="nombre" required>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">Categoría <span class="text-danger">*</span></label>
+                <select class="form-select" name="categoria" id="categoria" required>
+                  <option value="">Seleccionar categoría</option>
+                  <option value="Medicamentos">Medicamentos</option>
+                  <option value="Vacunas">Vacunas</option>
+                  <option value="Antibióticos">Antibióticos</option>
+                  <option value="Suplementos">Suplementos</option>
+                  <option value="Alimentación">Alimentación</option>
+                  <option value="Higiene">Higiene</option>
+                  <option value="Instrumental">Instrumental</option>
+                  <option value="Accesorios">Accesorios</option>
+                </select>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">Precio (S/) <span class="text-danger">*</span></label>
+                <input type="number" class="form-control" name="precio" id="precio" step="0.01" min="0" required>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">Marca</label>
+                <input type="text" class="form-control" name="marca" id="marca">
+              </div>
+              <div class="col-md-4">
+                <label class="form-label">Stock <span class="text-danger">*</span></label>
+                <input type="number" class="form-control" name="stock" id="stock" min="0" required>
+              </div>
+              <div class="col-md-4">
+                <label class="form-label">Stock Mínimo</label>
+                <input type="number" class="form-control" name="stockMinimo" id="stockMinimo" min="0">
+              </div>
+              <div class="col-md-4">
+                <label class="form-label">Imágenes</label>
+                <input type="text" class="form-control" name="imagen" id="imagen" 
+                       placeholder="https://ejemplo.com/imagen1.jpg;https://ejemplo.com/imagen2.jpg">
+                <div class="form-text">Separa múltiples URLs con punto y coma (;)</div>
+              </div>
+              <div class="col-12">
+                <label class="form-label">Descripción</label>
+                <textarea class="form-control" name="descripcion" id="descripcion" rows="3"></textarea>
+              </div>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
+              <i class="bi bi-x-lg me-1"></i> Cancelar
+            </button>
+            <button type="submit" class="btn btn-primary" id="btnGuardar">
+              <i class="bi bi-check-lg me-1"></i> Guardar Producto
+            </button>
+          </div>
+        </form>
+      </div>
     </div>
   </div>
-</section>
-	
-	
-	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+  
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.12.4/dist/sweetalert2.all.min.js"></script>
+  <script src="/js/utils.js"></script>
+  <script>
+    let productos = [];
+    let productoEditando = null;
+
+    document.addEventListener("DOMContentLoaded", function() {
+      loadProductos();
+      setupEventListeners();
+    });
+
+    function setupEventListeners() {
+      document.getElementById('searchInput').addEventListener('input', debounce(filterProductos, 300));
+      document.getElementById('categoriaFilter').addEventListener('change', filterProductos);
+      document.getElementById('stockFilter').addEventListener('change', filterProductos);
+      document.getElementById('estadoFilter').addEventListener('change', filterProductos);
+      document.getElementById('formProducto').addEventListener('submit', handleSubmitProducto);
+    }
+
+    async function loadProductos() {
+      try {
+        const res = await fetch("/api/productos");
+        if (!res.ok) throw new Error('Error al cargar productos');
+        
+        const data = await res.json();
+        productos = data;
+        renderProductos();
+      } catch (error) {
+        console.error("Error:", error);
+        showError("Error al cargar los productos");
+      }
+    }
+
+    function renderProductos() {
+      const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+      const categoriaFilter = document.getElementById('categoriaFilter').value;
+      const stockFilter = document.getElementById('stockFilter').value;
+      const estadoFilter = document.getElementById('estadoFilter').value;
+      
+      let filteredProductos = productos.filter(producto => {
+        if (searchTerm) {
+          const nombre = producto.nombre.toLowerCase();
+          const marca = (producto.marca || '').toLowerCase();
+          const categoria = (producto.categoria || '').toLowerCase();
+          if (!nombre.includes(searchTerm) && !marca.includes(searchTerm) && !categoria.includes(searchTerm)) {
+            return false;
+          }
+        }
+        
+        if (categoriaFilter && producto.categoria !== categoriaFilter) {
+          return false;
+        }
+        
+        if (stockFilter) {
+          const stock = producto.stock || 0;
+          const stockMinimo = producto.stockMinimo || 0;
+          switch(stockFilter) {
+            case 'bajo': if (stock >= stockMinimo) return false; break;
+            case 'normal': if (stock < stockMinimo || stock === 0) return false; break;
+            case 'agotado': if (stock > 0) return false; break;
+          }
+        }
+        
+        if (estadoFilter) {
+          const activo = estadoFilter === 'activo';
+          if (producto.activo !== activo) return false;
+        }
+        
+        return true;
+      });
+
+      renderProductosGrid(filteredProductos);
+      renderProductosTable(filteredProductos);
+    }
+
+    function renderProductosGrid(productos) {
+      const grid = document.getElementById('productosGrid');
+      
+      if (productos.length === 0) {
+        grid.innerHTML = `
+          <div class="col-12">
+            <div class="text-center py-5">
+              <i class="bi bi-box fs-1 text-muted"></i>
+              <p class="text-muted mt-2">No se encontraron productos</p>
+            </div>
+          </div>
+        `;
+        return;
+      }
+
+      grid.innerHTML = productos.map(producto => {
+        const images = VetCareUtils.parseImages(producto.imagen);
+        const primaryImage = images.length > 0 ? images[0] : 'https://images.unsplash.com/photo-1601758123927-1975a5e2b94c?q=80&w=400';
+        
+        return `
+        <div class="col-xl-3 col-lg-4 col-md-6">
+          <div class="card h-100 shadow-sm border-0" style="transition: transform 0.3s ease, box-shadow 0.3s ease;">
+            <div class="card-img-top position-relative" style="" 
+                 onclick="showProductImages('${producto.nombre}', '${producto.imagen || ''}')">
+              <img src="${primaryImage}" 
+                   class="w-100 h-100 object-fit-cover" alt="${producto.nombre}" 
+                   style="transition: transform 0.3s ease;">
+              <div class="position-absolute top-0 end-0 m-2">
+                <span class="badge bg-${VetCareUtils.getStockBadgeClass(producto.stock, producto.stockMinimo)}">${VetCareUtils.getStockText(producto.stock, producto.stockMinimo)}</span>
+              </div>
+              ${images.length > 1 ? `
+                <div class="position-absolute top-0 start-0 m-2">
+                  <span class="badge bg-info">
+                    <i class="bi bi-images me-1"></i>${images.length}
+                  </span>
+                </div>
+              ` : ''}
+              <div class="position-absolute bottom-0 start-0 end-0 bg-gradient bg-opacity-75 p-2">
+                <small class="text-white fw-semibold">
+                  <i class="bi bi-images me-1"></i>Ver imágenes
+                </small>
+              </div>
+            </div>
+            <div class="card-body">
+              <h5 class="card-title text-truncate" title="${producto.nombre}">${producto.nombre}</h5>
+              <p class="card-text text-muted small">
+                <i class="bi bi-tag me-1"></i>${producto.categoria || 'Sin categoría'}<br>
+                <i class="bi bi-currency-dollar me-1"></i>${VetCareUtils.formatCurrency(producto.precio)}<br>
+                <i class="bi bi-box me-1"></i>${producto.stock} unidades
+              </p>
+              ${producto.descripcion ? `<p class="card-text small text-muted">${producto.descripcion.substring(0, 80)}${producto.descripcion.length > 80 ? '...' : ''}</p>` : ''}
+              <div class="d-flex justify-content-between align-items-center">
+                <small class="text-muted">${producto.marca || 'Sin marca'}</small>
+                <div class="btn-group btn-group-sm">
+                  <button class="btn btn-outline-success" onclick="editarProducto(${producto.id})" title="Editar">
+                    <i class="bi bi-pencil"></i>
+                  </button>
+                  <button class="btn btn-outline-info" onclick="verDetalles(${producto.id})" title="Ver detalles">
+                    <i class="bi bi-eye"></i>
+                  </button>
+                  <button class="btn btn-outline-danger" onclick="eliminarProducto(${producto.id})" title="Eliminar">
+                    <i class="bi bi-trash"></i>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        `;
+      }).join('');
+    }
+
+    // Función para mostrar imágenes de productos
+    function showProductImages(nombre, imagenString) {
+      const images = VetCareUtils.parseImages(imagenString);
+      VetCareUtils.showImageModal(nombre, images);
+    }
+
+    function renderProductosTable(productos) {
+      const tbody = document.getElementById("tbodyProductos");
+      
+      if (productos.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="8" class="text-center py-4">
+              <i class="bi bi-box fs-1 text-muted"></i>
+              <p class="text-muted mt-2">No se encontraron productos</p>
+            </td>
+          </tr>
+        `;
+        return;
+      }
+
+      tbody.innerHTML = productos.map(producto => `
+        <tr>
+          <td><span class="fw-semibold">#${producto.id}</span></td>
+          <td>
+            <div class="d-flex align-items-center">
+              <img src="${producto.imagen || 'https://i.pravatar.cc/40'}" alt="Avatar" class="rounded-circle me-2" width="32" height="32">
+              <div>
+                <div class="fw-semibold">${producto.nombre}</div>
+              </div>
+            </div>
+          </td>
+          <td><span class="badge bg-info">${producto.categoria || 'Sin categoría'}</span></td>
+          <td><span class="fw-bold text-success">${VetCareUtils.formatCurrency(producto.precio)}</span></td>
+          <td><span class="badge ${getStockBadgeClass(producto.stock, producto.stockMinimo)}">${producto.stock}</span></td>
+          <td><span class="text-muted">${producto.marca || '-'}</span></td>
+          <td><span class="text-muted">${new Date(producto.fechaCreacion).toLocaleDateString()}</span></td>
+          <td class="text-center">
+            <div class="btn-group btn-group-sm">
+              <button class="btn btn-outline-primary" onclick="editarProducto(${producto.id})" title="Editar">
+                <i class="bi bi-pencil"></i>
+              </button>
+              <button class="btn btn-outline-info" onclick="verDetalles(${producto.id})" title="Ver detalles">
+                <i class="bi bi-eye"></i>
+              </button>
+              <button class="btn btn-outline-danger" onclick="eliminarProducto(${producto.id})" title="Eliminar">
+                <i class="bi bi-trash"></i>
+              </button>
+            </div>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    function getStockBadgeClass(stock, stockMinimo) {
+      if (stock === 0) return 'danger';
+      if (stock < (stockMinimo || 0)) return 'warning';
+      return 'success';
+    }
+
+    function getStockText(stock, stockMinimo) {
+      if (stock === 0) return 'Agotado';
+      if (stock < (stockMinimo || 0)) return 'Bajo';
+      return 'Normal';
+    }
+
+    function toggleVista(tipo) {
+      const grid = document.getElementById('productosGrid');
+      const tabla = document.getElementById('tablaProductos');
+      
+      if (tipo === 'grid') {
+        grid.classList.remove('d-none');
+        tabla.classList.add('d-none');
+      } else {
+        grid.classList.add('d-none');
+        tabla.classList.remove('d-none');
+      }
+    }
+
+    function filterProductos() {
+      renderProductos();
+    }
+
+    function limpiarFiltros() {
+      document.getElementById('searchInput').value = '';
+      document.getElementById('categoriaFilter').value = '';
+      document.getElementById('stockFilter').value = '';
+      document.getElementById('estadoFilter').value = '';
+      renderProductos();
+    }
+
+    async function handleSubmitProducto(e) {
+      e.preventDefault();
+      
+      const formData = new FormData(e.target);
+      const productoData = {
+        nombre: formData.get('nombre'),
+        categoria: formData.get('categoria'),
+        precio: parseFloat(formData.get('precio')),
+        marca: formData.get('marca'),
+        stock: parseInt(formData.get('stock')),
+        stockMinimo: parseInt(formData.get('stockMinimo')) || 0,
+        descripcion: formData.get('descripcion'),
+        imagen: formData.get('imagen'),
+        activo: true
+      };
+      
+      try {
+        const url = productoEditando ? `/api/productos/${productoEditando}` : '/api/productos';
+        const method = productoEditando ? 'PUT' : 'POST';
+        
+        const response = await fetch(url, {
+          method: method,
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(productoData)
+        });
+
+        if (!response.ok) throw new Error('Error al guardar producto');
+
+        showSuccess(productoEditando ? 'Producto actualizado correctamente' : 'Producto registrado correctamente');
+        
+        bootstrap.Modal.getInstance(document.getElementById('productoModal')).hide();
+        document.getElementById('formProducto').reset();
+        productoEditando = null;
+        document.getElementById('modalTitle').textContent = 'Nuevo Producto';
+        loadProductos();
+        
+      } catch (error) {
+        console.error('Error:', error);
+        showError('Error al guardar el producto');
+      }
+    }
+
+    function editarProducto(id) {
+      const producto = productos.find(p => p.id === id);
+      if (!producto) return;
+      
+      productoEditando = id;
+      document.getElementById('modalTitle').textContent = 'Editar Producto';
+      
+      document.getElementById('nombre').value = producto.nombre;
+      document.getElementById('categoria').value = producto.categoria || '';
+      document.getElementById('precio').value = producto.precio;
+      document.getElementById('marca').value = producto.marca || '';
+      document.getElementById('stock').value = producto.stock;
+      document.getElementById('stockMinimo').value = producto.stockMinimo || 0;
+      document.getElementById('descripcion').value = producto.descripcion || '';
+      document.getElementById('imagen').value = producto.imagen || '';
+      
+      new bootstrap.Modal(document.getElementById('productoModal')).show();
+    }
+
+    function verDetalles(id) {
+      const producto = productos.find(p => p.id === id);
+      if (!producto) return;
+      
+      showInfo(`
+        <strong>Producto #${producto.id}</strong><br>
+        <strong>Nombre:</strong> ${producto.nombre}<br>
+        <strong>Categoría:</strong> ${producto.categoria || 'Sin categoría'}<br>
+        <strong>Precio:</strong> S/ ${producto.precio}<br>
+        <strong>Stock:</strong> ${producto.stock} unidades<br>
+        <strong>Stock Mínimo:</strong> ${producto.stockMinimo || 0}<br>
+        <strong>Marca:</strong> ${producto.marca || 'Sin marca'}<br>
+        <strong>Descripción:</strong> ${producto.descripcion || 'Sin descripción'}
+      `);
+    }
+
+    async function eliminarProducto(id) {
+      const producto = productos.find(p => p.id === id);
+      if (!producto) return;
+
+      const result = await Swal.fire({
+        title: '¿Estás seguro?',
+        text: `Se eliminará el producto ${producto.nombre}`,
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#3085d6',
+        confirmButtonText: 'Sí, eliminar',
+        cancelButtonText: 'Cancelar'
+      });
+
+      if (result.isConfirmed) {
+        try {
+          const response = await fetch(`/api/productos/${id}`, { method: 'DELETE' });
+          if (!response.ok) throw new Error('Error al eliminar producto');
+
+          showSuccess('Producto eliminado correctamente');
+          loadProductos();
+        } catch (error) {
+          console.error('Error:', error);
+          showError('Error al eliminar el producto');
+        }
+      }
+    }
+
+    function exportarProductos() {
+      showInfo('Función de exportación en desarrollo');
+    }
+
+    function debounce(func, wait) {
+      let timeout;
+      return function executedFunction(...args) {
+        const later = () => {
+          clearTimeout(timeout);
+          func(...args);
+        };
+        clearTimeout(timeout);
+        timeout = setTimeout(later, wait);
+      };
+    }
+
+    function showSuccess(message) {
+      Swal.fire({
+        title: '¡Éxito!',
+        text: message,
+        icon: 'success',
+        timer: 2000,
+        showConfirmButton: false
+      });
+    }
+
+    function showError(message) {
+      Swal.fire({
+        title: 'Error',
+        text: message,
+        icon: 'error'
+      });
+    }
+
+    function showInfo(message) {
+      Swal.fire({
+        title: 'Información',
+        html: message,
+        icon: 'info'
+      });
+    }
+  </script>
 </body>
 </html>

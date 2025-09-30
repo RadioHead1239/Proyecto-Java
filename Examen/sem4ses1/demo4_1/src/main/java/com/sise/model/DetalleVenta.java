@@ -1,70 +1,45 @@
 package com.sise.model;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import java.math.BigDecimal;
 
 @Entity
-@Table(name = "detalleventa")
+@Table(name = "detalle_venta")
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class DetalleVenta {
+    
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id_detalle")
-    private Integer idDetalle;
-
-    @ManyToOne @JoinColumn(name = "id_venta")
-    private Venta venta;
-
-    @ManyToOne @JoinColumn(name = "id_producto")
-    private Producto producto;
-
+    private Long id;
+    
+    @Column(name = "cantidad", nullable = false)
     private Integer cantidad;
-    private Double subtotal;
-
-    public Integer getIdDetalle() {
-        return idDetalle;
+    
+    @Column(name = "precio_unitario", nullable = false, precision = 10, scale = 2)
+    private BigDecimal precioUnitario;
+    
+    @Column(name = "subtotal", nullable = false, precision = 10, scale = 2)
+    private BigDecimal subtotal;
+    
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "id_venta", nullable = false)
+    private Venta venta;
+    
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "id_producto", nullable = false)
+    private Producto producto;
+    
+    @PrePersist
+    @PreUpdate
+    protected void calcularSubtotal() {
+        if (precioUnitario != null && cantidad != null) {
+            subtotal = precioUnitario.multiply(BigDecimal.valueOf(cantidad));
+        }
     }
-
-    public void setIdDetalle(Integer idDetalle) {
-        this.idDetalle = idDetalle;
-    }
-
-    public Venta getVenta() {
-        return venta;
-    }
-
-    public void setVenta(Venta venta) {
-        this.venta = venta;
-    }
-
-    public Producto getProducto() {
-        return producto;
-    }
-
-    public void setProducto(Producto producto) {
-        this.producto = producto;
-    }
-
-    public Integer getCantidad() {
-        return cantidad;
-    }
-
-    public void setCantidad(Integer cantidad) {
-        this.cantidad = cantidad;
-    }
-
-    public Double getSubtotal() {
-        return subtotal;
-    }
-
-    public void setSubtotal(Double subtotal) {
-        this.subtotal = subtotal;
-    }
-
-
 }

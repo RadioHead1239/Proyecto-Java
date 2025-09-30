@@ -1,64 +1,652 @@
-
 <!doctype html>
 <html lang="es" xmlns:th="http://www.thymeleaf.org">
 <head>
-	<meta charset="utf-8" />
-	<meta name="viewport" content="width=device-width, initial-scale=1" />
-	<title>Clientes · Dashboard</title>
-	<!-- Bootstrap & Icons -->
-	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-	<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
-	<style>
-		:root{ --brand:#0066cc; --brand-2:#00bcd4; } /* ===== SIDEBAR ===== */ .sidebar{ position:fixed; inset-block:0; inset-inline-start:0; width:260px; background:#0b1220; color:#d9e1f2; z-index:1030; overflow-y:auto; } .sidebar .nav-link{ color:#a7b1cc; border-radius:.6rem; } .sidebar .nav-link.active{ background:linear-gradient(135deg, var(--brand), var(--brand-2)); color:#fff; } .sidebar .nav-link:hover{ color:#fff; background:rgba(255,255,255,.06); } .brand{ color:#fff; font-weight:700; letter-spacing:.5px; } .brand small{ color:#7bb6ff; font-weight:500; } .avatar{ width:36px; height:36px; border-radius:50%; object-fit:cover; } /* ===== CONTENT ===== */ .content{ margin-inline-start:260px; min-height:100vh; } .content .topbar{ position:sticky; top:0; z-index:1020; backdrop-filter:saturate(180%) blur(6px); background:rgba(246,248,251,.8); } body { background:#f6f8fb; font-family:"Poppins",sans-serif; } .content { margin-inline-start:260px; min-height:100vh; } .topbar { position:sticky; top:0; z-index:1020; backdrop-filter:saturate(180%) blur(6px); background:rgba(246,248,251,.8); } .card { border-radius:1rem; box-shadow:0 4px 12px rgba(0,0,0,.08); } .btn-primary { background:linear-gradient(135deg,#0066cc,#00bcd4); border:0; } .btn-primary:hover { background:linear-gradient(135deg,#005bb5,#00a2b3); }
-	</style>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Mascotas · VetCare</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11.12.4/dist/sweetalert2.min.css" rel="stylesheet">
+  <link href="/css/global.css" rel="stylesheet">
+  
+  <style>
+     :root {
+      --sidebar-bg: linear-gradient(180deg, #84cddb, #b4dadf);
+      --sidebar-hover: rgba(255, 255, 255, 0.15);
+      --sidebar-active: linear-gradient(135deg, #4facfe, #00f2fe);
+      --text-color: #ffffff;
+    }
+  
+    /* Sidebar */
+    .sidebar {
+      position: fixed;
+      inset-block: 0;
+      inset-inline-start: 0;
+      width: 260px;
+      background: var(--sidebar-bg);
+      color: var(--text-color);
+      z-index: 1030;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      border-right: 3px solid rgba(255,255,255,0.1);
+    }
+  
+    /* Logo */
+    .brand-logo {
+      width: 90%;
+      border-radius: 20px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+      transition: transform .3s ease;
+    }
+    .brand-logo:hover {
+      transform: scale(1.05);
+    }
+  
+    /* Menú */
+    .sidebar .nav-link {
+      color: var(--text-color);
+      border-radius: .6rem;
+      padding: .65rem 1rem;
+      display: flex;
+      align-items: center;
+      gap: .6rem;
+      transition: all .2s;
+      font-weight: 500;
+    }
+  
+    .sidebar .nav-link:hover {
+      background: var(--sidebar-hover);
+    }
+  
+    .sidebar .nav-link.active {
+      background: var(--sidebar-active);
+      color: #fff;
+      box-shadow: 0 2px 8px rgba(0,0,0,.3);
+    }
+  
+    /* Footer */
+    .sidebar-footer {
+      padding: 1rem;
+      font-size: .85rem;
+      color: rgba(255,255,255,.8);
+      border-top: 1px solid rgba(255,255,255,.2);
+    }
+  </style>
 </head>
 <body>
-	<aside class="sidebar d-flex flex-column p-3">
-		<a href="/dashboard" class="d-flex align-items-center mb-3 text-decoration-none"> <i class="bi bi-scissors text-primary fs-3 me-2"></i> <span class="brand fs-5">Peluquería <small>Mascotas</small></span> </a>
-		<hr>
-		<ul class="nav nav-pills flex-column mb-auto">
-			<li><a href="/dashboard" class="nav-link active"><i class="bi bi-speedometer2 me-2"></i> Dashboard</a></li>
-			<li><a href="/cliente" class="nav-link"><i class="bi bi-people me-2"></i> Clientes</a></li>
-			<li><a href="/mascota" class="nav-link"><i class="bi bi-bag-heart me-2"></i> Mascotas</a></li>
-			<li><a href="/cita" class="nav-link"><i class="bi bi-calendar2-week me-2"></i> Citas</a></li>
-			<li><a href="/venta" class="nav-link"><i class="bi bi-receipt me-2"></i> Ventas</a></li>
-			<li><a href="/producto" class="nav-link"><i class="bi bi-box-seam me-2"></i> Productos</a></li>
-			<li><a href="/usuario" class="nav-link"><i class="bi bi-person-gear me-2"></i> Usuarios</a></li>
-		</ul>
-		<hr>
-		<div class="dropdown">
-			<a href="#" class="d-flex align-items-center text-decoration-none dropdown-toggle" data-bs-toggle="dropdown"> <img src="https://i.pravatar.cc/40" alt="user" class="avatar me-2"> <strong>Admin</strong> </a>
-			<ul class="dropdown-menu dropdown-menu-dark shadow">
-				<li><a class="dropdown-item" href="#">Perfil</a></li>
-				<li><a class="dropdown-item" href="#">Configuración</a></li>
-				<li>
-					<hr class="dropdown-divider">
-				</li>
-				<li><a class="dropdown-item" href="#">Cerrar sesión</a></li>
-			</ul>
-		</div>
-	</aside>
-	
-	<section id="view-mascotas" class="app-view">
-  <div class="d-flex justify-content-between mb-3">
-    <h5><i class="bi bi-bag-heart me-2"></i>Mascotas</h5>
-    <button class="btn btn-primary"><i class="bi bi-plus-lg"></i> Nueva Mascota</button>
-  </div>
-  <div class="card shadow-sm">
-    <div class="table-responsive">
-      <table class="table table-hover align-middle">
-        <thead class="table-light">
-          <tr>
-            <th>Cliente</th><th>Mascota</th><th>Especie</th><th>Raza</th><th>Edad</th><th>Peso</th><th>Acciones</th>
-          </tr>
-        </thead>
-        <tbody id="tbodyMascotas"></tbody>
-      </table>
+  
+  <aside class="sidebar d-flex flex-column p-3">
+    
+    <div class="brand mb-4 text-center">
+      <img src="https://marketplace.canva.com/EAGre3wkiKc/1/0/1600w/canva-logotipo-veterinaria-ilustrado-lindo-azul-aqua-beige-g5Mq7lvYdmg.jpg" 
+           alt="VetCare Logo" 
+           class="brand-logo">
+    </div>
+  
+    
+    <ul class="nav flex-column gap-1">
+      <li><a href="/dashboard" class="nav-link"><i class="bi bi-speedometer2 me-2"></i>Dashboard</a></li>
+      <li><a href="/cliente" class="nav-link"><i class="bi bi-people me-2"></i>Clientes</a></li>
+      <li><a href="/mascota" class="nav-link"><i class="bi bi-bag-heart me-2"></i>Mascotas</a></li>
+      <li><a href="/cita" class="nav-link"><i class="bi bi-calendar2-week me-2"></i>Citas</a></li>
+      <li><a href="/venta" class="nav-link"><i class="bi bi-receipt me-2"></i>Ventas</a></li>
+      <li><a href="/producto" class="nav-link"><i class="bi bi-box-seam me-2"></i>Productos</a></li>
+      <li><a href="/usuario" class="nav-link"><i class="bi bi-person-gear me-2"></i>Usuarios</a></li>
+      <li><a href="/pago" class="nav-link"><i class="bi bi-cash-coin me-2"></i>Pagos</a></li>
+      <li><a href="/servicio" class="nav-link"><i class="bi bi-scissors me-2"></i>Servicios</a></li>
+    </ul>
+  
+    
+    <div class="sidebar-footer mt-auto text-center small">
+      © 2025 VetCare
+    </div>
+  </aside>
+
+  
+  <main class="content">
+    <div class="topbar d-flex align-items-center justify-content-between">
+      <div>
+        <h5 class="mb-0"><i class="bi bi-heart me-2"></i>Gestión de Mascotas</h5>
+        <small class="text-muted">Administra la información de las mascotas</small>
+      </div>
+      <div class="d-flex gap-2">
+        <button class="btn btn-outline-primary btn-sm" onclick="exportarMascotas()">
+          <i class="bi bi-download me-1"></i> Exportar
+        </button>
+        <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#mascotaModal">
+          <i class="bi bi-heart-fill me-1"></i> Nueva Mascota
+        </button>
+      </div>
+    </div>
+
+    <div class="container-fluid py-4">
+      
+      <div class="card mb-4">
+        <div class="card-body">
+          <div class="row g-3">
+            <div class="col-md-3">
+              <label class="form-label">Buscar mascota</label>
+              <div class="input-group">
+                <span class="input-group-text"><i class="bi bi-search"></i></span>
+                <input type="text" class="form-control" id="searchInput" placeholder="Nombre, raza...">
+              </div>
+            </div>
+            <div class="col-md-2">
+              <label class="form-label">Especie</label>
+              <select class="form-select" id="especieFilter">
+                <option value="">Todas</option>
+                <option value="Perro">Perro</option>
+                <option value="Gato">Gato</option>
+                <option value="Otro">Otro</option>
+              </select>
+            </div>
+            <div class="col-md-3">
+              <label class="form-label">Cliente</label>
+              <select class="form-select" id="clienteFilter">
+                <option value="">Todos los clientes</option>
+              </select>
+            </div>
+            <div class="col-md-2">
+              <label class="form-label">Edad mínima</label>
+              <input type="number" class="form-control" id="edadMin" placeholder="0">
+            </div>
+            <div class="col-md-2 d-flex align-items-end">
+              <button class="btn btn-outline-secondary w-100" onclick="limpiarFiltros()">
+                <i class="bi bi-arrow-clockwise me-1"></i> Limpiar
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      
+      <div class="row g-4" id="mascotasGrid">
+        
+      </div>
+
+      
+      <div class="card d-none" id="tablaMascotas">
+        <div class="card-header d-flex justify-content-between align-items-center">
+          <h6 class="mb-0"><i class="bi bi-list-ul me-2"></i>Lista de Mascotas</h6>
+          <div class="btn-group btn-group-sm">
+            <button class="btn btn-outline-primary active" onclick="toggleVista('grid')">
+              <i class="bi bi-grid-3x3-gap"></i> Tarjetas
+            </button>
+            <button class="btn btn-outline-primary" onclick="toggleVista('table')">
+              <i class="bi bi-table"></i> Tabla
+            </button>
+          </div>
+        </div>
+        <div class="card-body p-0">
+          <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+              <thead class="table-light">
+                <tr>
+                  <th width="5%">ID</th>
+                  <th width="20%">Mascota</th>
+                  <th width="15%">Especie/Raza</th>
+                  <th width="10%">Edad</th>
+                  <th width="10%">Peso</th>
+                  <th width="20%">Cliente</th>
+                  <th width="20%" class="text-center">Acciones</th>
+                </tr>
+              </thead>
+              <tbody id="tbodyMascotas">
+                
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  
+  <div class="modal fade" id="mascotaModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+      <div class="modal-content">
+        <form id="formMascota">
+          <div class="modal-header bg-gradient text-white">
+            <h5 class="modal-title">
+              <i class="bi bi-heart me-2"></i>
+              <span id="modalTitle">Nueva Mascota</span>
+            </h5>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+          </div>
+          <div class="modal-body">
+            <div class="row g-3">
+              <div class="col-md-6">
+                <label class="form-label">Nombre <span class="text-danger">*</span></label>
+                <input type="text" class="form-control" name="nombre" id="nombre" required>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">Especie <span class="text-danger">*</span></label>
+                <select class="form-select" name="especie" id="especie" required>
+                  <option value="">Seleccionar especie</option>
+                  <option value="Perro">Perro</option>
+                  <option value="Gato">Gato</option>
+                  <option value="Otro">Otro</option>
+                </select>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">Raza</label>
+                <input type="text" class="form-control" name="raza" id="raza">
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">Cliente <span class="text-danger">*</span></label>
+                <select class="form-select" name="idCliente" id="idCliente" required>
+                  <option value="">Seleccionar cliente</option>
+                </select>
+              </div>
+              <div class="col-md-4">
+                <label class="form-label">Edad (años)</label>
+                <input type="number" class="form-control" name="edad" id="edad" min="0" max="30">
+              </div>
+              <div class="col-md-4">
+                <label class="form-label">Peso (kg)</label>
+                <input type="number" class="form-control" name="peso" id="peso" step="0.1" min="0">
+              </div>
+              <div class="col-md-4">
+                <label class="form-label">Imagen</label>
+                <input type="url" class="form-control" name="imagen" id="imagen" placeholder="https://ejemplo.com/imagen.jpg">
+              </div>
+              <div class="col-12">
+                <label class="form-label">Observaciones</label>
+                <textarea class="form-control" name="observaciones" id="observaciones" rows="3"></textarea>
+              </div>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
+              <i class="bi bi-x-lg me-1"></i> Cancelar
+            </button>
+            <button type="submit" class="btn btn-primary" id="btnGuardar">
+              <i class="bi bi-check-lg me-1"></i> Guardar Mascota
+            </button>
+          </div>
+        </form>
+      </div>
     </div>
   </div>
-</section>
-	
-	
-	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+  
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.12.4/dist/sweetalert2.all.min.js"></script>
+  <script>
+    let mascotas = [];
+    let clientes = [];
+    let mascotaEditando = null;
+
+    document.addEventListener("DOMContentLoaded", function() {
+      loadMascotas();
+      loadClientes();
+      setupEventListeners();
+    });
+
+    function setupEventListeners() {
+      document.getElementById('searchInput').addEventListener('input', debounce(filterMascotas, 300));
+      document.getElementById('especieFilter').addEventListener('change', filterMascotas);
+      document.getElementById('clienteFilter').addEventListener('change', filterMascotas);
+      document.getElementById('edadMin').addEventListener('input', filterMascotas);
+      document.getElementById('formMascota').addEventListener('submit', handleSubmitMascota);
+    }
+
+    async function loadMascotas() {
+      try {
+        const res = await fetch("/api/mascotas");
+        if (!res.ok) throw new Error('Error al cargar mascotas');
+        
+        const data = await res.json();
+        mascotas = data;
+        renderMascotas();
+      } catch (error) {
+        console.error("Error:", error);
+        showError("Error al cargar las mascotas");
+      }
+    }
+
+    async function loadClientes() {
+      try {
+        const res = await fetch("/api/clientes");
+        if (!res.ok) throw new Error('Error al cargar clientes');
+        
+        const data = await res.json();
+        clientes = data;
+        populateClientesSelect();
+        populateClientesFilter();
+      } catch (error) {
+        console.error("Error:", error);
+      }
+    }
+
+    function populateClientesSelect() {
+      const select = document.getElementById('idCliente');
+      select.innerHTML = '<option value="">Seleccionar cliente</option>';
+      clientes.forEach(cliente => {
+        const option = document.createElement('option');
+        option.value = cliente.id;
+        option.textContent = `${cliente.nombre} ${cliente.apellido}`;
+        select.appendChild(option);
+      });
+    }
+
+    function populateClientesFilter() {
+      const select = document.getElementById('clienteFilter');
+      select.innerHTML = '<option value="">Todos los clientes</option>';
+      clientes.forEach(cliente => {
+        const option = document.createElement('option');
+        option.value = cliente.id;
+        option.textContent = `${cliente.nombre} ${cliente.apellido}`;
+        select.appendChild(option);
+      });
+    }
+
+    function renderMascotas() {
+      const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+      const especieFilter = document.getElementById('especieFilter').value;
+      const clienteFilter = document.getElementById('clienteFilter').value;
+      const edadMin = parseInt(document.getElementById('edadMin').value) || 0;
+      
+      let filteredMascotas = mascotas.filter(mascota => {
+        if (searchTerm) {
+          const nombre = mascota.nombre.toLowerCase();
+          const raza = (mascota.raza || '').toLowerCase();
+          if (!nombre.includes(searchTerm) && !raza.includes(searchTerm)) {
+            return false;
+          }
+        }
+        
+        if (especieFilter && mascota.especie !== especieFilter) {
+          return false;
+        }
+        
+        if (clienteFilter && mascota.idCliente != clienteFilter) {
+          return false;
+        }
+        
+        if (edadMin > 0 && (mascota.edad || 0) < edadMin) {
+          return false;
+        }
+        
+        return true;
+      });
+
+      renderMascotasGrid(filteredMascotas);
+      renderMascotasTable(filteredMascotas);
+    }
+
+    function renderMascotasGrid(mascotas) {
+      const grid = document.getElementById('mascotasGrid');
+      
+      if (mascotas.length === 0) {
+        grid.innerHTML = `
+          <div class="col-12">
+            <div class="text-center py-5">
+              <i class="bi bi-heart fs-1 text-muted"></i>
+              <p class="text-muted mt-2">No se encontraron mascotas</p>
+            </div>
+          </div>
+        `;
+        return;
+      }
+
+      grid.innerHTML = mascotas.map(mascota => `
+        <div class="col-xl-3 col-lg-4 col-md-6">
+          <div class="card h-100 shadow-sm">
+            <div class="card-img-top position-relative" style="height: 200px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+              <img src="${mascota.imagen || 'https://images.unsplash.com/photo-1601758123927-1975a5e2b94c?q=80&w=400'}" 
+                   class="w-100 h-100 object-fit-cover" alt="${mascota.nombre}">
+              <div class="position-absolute top-0 end-0 m-2">
+                <span class="badge bg-${getEspecieBadgeClass(mascota.especie)}">${mascota.especie}</span>
+              </div>
+            </div>
+            <div class="card-body">
+              <h5 class="card-title">${mascota.nombre}</h5>
+              <p class="card-text text-muted small">
+                <i class="bi bi-tag me-1"></i>${mascota.raza || 'Sin raza especificada'}<br>
+                <i class="bi bi-calendar me-1"></i>${mascota.edad || '?'} años<br>
+                <i class="bi bi-speedometer2 me-1"></i>${mascota.peso || '?'} kg
+              </p>
+              <div class="d-flex justify-content-between align-items-center">
+                <small class="text-muted">${mascota.cliente || 'Cliente no asignado'}</small>
+                <div class="btn-group btn-group-sm">
+                  <button class="btn btn-outline-primary" onclick="editarMascota(${mascota.id})" title="Editar">
+                    <i class="bi bi-pencil"></i>
+                  </button>
+                  <button class="btn btn-outline-info" onclick="verCitas(${mascota.id})" title="Ver citas">
+                    <i class="bi bi-calendar-check"></i>
+                  </button>
+                  <button class="btn btn-outline-danger" onclick="eliminarMascota(${mascota.id})" title="Eliminar">
+                    <i class="bi bi-trash"></i>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function renderMascotasTable(mascotas) {
+      const tbody = document.getElementById("tbodyMascotas");
+      
+      if (mascotas.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="7" class="text-center py-4">
+              <i class="bi bi-heart fs-1 text-muted"></i>
+              <p class="text-muted mt-2">No se encontraron mascotas</p>
+            </td>
+          </tr>
+        `;
+        return;
+      }
+
+      tbody.innerHTML = mascotas.map(mascota => `
+        <tr>
+          <td><span class="fw-semibold">#${mascota.id}</span></td>
+          <td>
+            <div class="d-flex align-items-center">
+              <img src="${mascota.imagen || 'https://i.pravatar.cc/40'}" alt="Avatar" class="rounded-circle me-2" width="32" height="32">
+              <div>
+                <div class="fw-semibold">${mascota.nombre}</div>
+              </div>
+            </div>
+          </td>
+          <td>
+            <div>
+              <div class="fw-semibold">${mascota.especie}</div>
+              <div class="small text-muted">${mascota.raza || 'Sin raza'}</div>
+            </div>
+          </td>
+          <td><span class="badge bg-info">${mascota.edad || '?'} años</span></td>
+          <td><span class="text-muted">${mascota.peso || '?'} kg</span></td>
+          <td><span class="text-muted">${mascota.cliente || '-'}</span></td>
+          <td class="text-center">
+            <div class="btn-group btn-group-sm">
+              <button class="btn btn-outline-primary" onclick="editarMascota(${mascota.id})" title="Editar">
+                <i class="bi bi-pencil"></i>
+              </button>
+              <button class="btn btn-outline-info" onclick="verCitas(${mascota.id})" title="Ver citas">
+                <i class="bi bi-calendar-check"></i>
+              </button>
+              <button class="btn btn-outline-danger" onclick="eliminarMascota(${mascota.id})" title="Eliminar">
+                <i class="bi bi-trash"></i>
+              </button>
+            </div>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    function getEspecieBadgeClass(especie) {
+      switch(especie) {
+        case 'Perro': return 'primary';
+        case 'Gato': return 'warning';
+        default: return 'secondary';
+      }
+    }
+
+    function toggleVista(tipo) {
+      const grid = document.getElementById('mascotasGrid');
+      const tabla = document.getElementById('tablaMascotas');
+      
+      if (tipo === 'grid') {
+        grid.classList.remove('d-none');
+        tabla.classList.add('d-none');
+      } else {
+        grid.classList.add('d-none');
+        tabla.classList.remove('d-none');
+      }
+    }
+
+    function filterMascotas() {
+      renderMascotas();
+    }
+
+    function limpiarFiltros() {
+      document.getElementById('searchInput').value = '';
+      document.getElementById('especieFilter').value = '';
+      document.getElementById('clienteFilter').value = '';
+      document.getElementById('edadMin').value = '';
+      renderMascotas();
+    }
+
+    async function handleSubmitMascota(e) {
+      e.preventDefault();
+      
+      const formData = new FormData(e.target);
+      const mascotaData = {
+        nombre: formData.get('nombre'),
+        especie: formData.get('especie'),
+        raza: formData.get('raza'),
+        edad: parseInt(formData.get('edad')) || null,
+        peso: parseFloat(formData.get('peso')) || null,
+        observaciones: formData.get('observaciones'),
+        imagen: formData.get('imagen'),
+        idCliente: parseInt(formData.get('idCliente'))
+      };
+      
+      try {
+        const url = mascotaEditando ? `/api/mascotas/${mascotaEditando}` : '/api/mascotas';
+        const method = mascotaEditando ? 'PUT' : 'POST';
+        
+        const response = await fetch(url, {
+          method: method,
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(mascotaData)
+        });
+
+        if (!response.ok) throw new Error('Error al guardar mascota');
+
+        showSuccess(mascotaEditando ? 'Mascota actualizada correctamente' : 'Mascota registrada correctamente');
+        
+        bootstrap.Modal.getInstance(document.getElementById('mascotaModal')).hide();
+        document.getElementById('formMascota').reset();
+        mascotaEditando = null;
+        document.getElementById('modalTitle').textContent = 'Nueva Mascota';
+        loadMascotas();
+        
+      } catch (error) {
+        console.error('Error:', error);
+        showError('Error al guardar la mascota');
+      }
+    }
+
+    function editarMascota(id) {
+      const mascota = mascotas.find(m => m.id === id);
+      if (!mascota) return;
+      
+      mascotaEditando = id;
+      document.getElementById('modalTitle').textContent = 'Editar Mascota';
+      
+      document.getElementById('nombre').value = mascota.nombre;
+      document.getElementById('especie').value = mascota.especie;
+      document.getElementById('raza').value = mascota.raza || '';
+      document.getElementById('edad').value = mascota.edad || '';
+      document.getElementById('peso').value = mascota.peso || '';
+      document.getElementById('observaciones').value = mascota.observaciones || '';
+      document.getElementById('imagen').value = mascota.imagen || '';
+      document.getElementById('idCliente').value = mascota.idCliente;
+      
+      new bootstrap.Modal(document.getElementById('mascotaModal')).show();
+    }
+
+    function verCitas(id) {
+      window.location.href = `/cita?mascota=${id}`;
+    }
+
+    async function eliminarMascota(id) {
+      const mascota = mascotas.find(m => m.id === id);
+      if (!mascota) return;
+
+      const result = await Swal.fire({
+        title: '¿Estás seguro?',
+        text: `Se eliminará la mascota ${mascota.nombre}`,
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#3085d6',
+        confirmButtonText: 'Sí, eliminar',
+        cancelButtonText: 'Cancelar'
+      });
+
+      if (result.isConfirmed) {
+        try {
+          const response = await fetch(`/api/mascotas/${id}`, { method: 'DELETE' });
+          if (!response.ok) throw new Error('Error al eliminar mascota');
+
+          showSuccess('Mascota eliminada correctamente');
+          loadMascotas();
+        } catch (error) {
+          console.error('Error:', error);
+          showError('Error al eliminar la mascota');
+        }
+      }
+    }
+
+    function exportarMascotas() {
+      showInfo('Función de exportación en desarrollo');
+    }
+
+    function debounce(func, wait) {
+      let timeout;
+      return function executedFunction(...args) {
+        const later = () => {
+          clearTimeout(timeout);
+          func(...args);
+        };
+        clearTimeout(timeout);
+        timeout = setTimeout(later, wait);
+      };
+    }
+
+    function showSuccess(message) {
+      Swal.fire({
+        title: '¡Éxito!',
+        text: message,
+        icon: 'success',
+        timer: 2000,
+        showConfirmButton: false
+      });
+    }
+
+    function showError(message) {
+      Swal.fire({
+        title: 'Error',
+        text: message,
+        icon: 'error'
+      });
+    }
+
+    function showInfo(message) {
+      Swal.fire({
+        title: 'Información',
+        text: message,
+        icon: 'info'
+      });
+    }
+  </script>
 </body>
 </html>

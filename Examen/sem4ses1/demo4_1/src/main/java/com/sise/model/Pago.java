@@ -1,63 +1,55 @@
 package com.sise.model;
 
+import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
-
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.Table;
 
 @Entity
 @Table(name = "pago")
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class Pago {
+    
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id_pago")
-    private Integer idPago;
-
-    @ManyToOne @JoinColumn(name = "id_cita", nullable = false)
-    private Cita cita;
-
-    private Double monto;
-
+    private Long id;
+    
+    @Column(name = "monto", nullable = false, precision = 10, scale = 2)
+    private BigDecimal monto;
+    
     @Column(name = "fecha_pago")
     private LocalDateTime fechaPago;
-
-    public Integer getIdPago() {
-        return idPago;
+    
+    @Enumerated(EnumType.STRING)
+    @Column(name = "metodo_pago", nullable = false)
+    private MetodoPago metodoPago;
+    
+    @Enumerated(EnumType.STRING)
+    @Column(name = "estado", nullable = false)
+    private Estado estado = Estado.Pendiente;
+    
+    @Column(name = "observaciones", columnDefinition = "TEXT")
+    private String observaciones;
+    
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "id_cita", nullable = false)
+    private Cita cita;
+    
+    @PrePersist
+    protected void onCreate() {
+        fechaPago = LocalDateTime.now();
     }
-
-    public void setIdPago(Integer idPago) {
-        this.idPago = idPago;
+    
+    public enum MetodoPago {
+        Efectivo, Tarjeta, Transferencia, Yape, Plin
     }
-
-    public Cita getCita() {
-        return cita;
+    
+    public enum Estado {
+        Pendiente, Completado, Cancelado, Reembolsado
     }
-
-    public void setCita(Cita cita) {
-        this.cita = cita;
-    }
-
-    public Double getMonto() {
-        return monto;
-    }
-
-    public void setMonto(Double monto) {
-        this.monto = monto;
-    }
-
-    public LocalDateTime getFechaPago() {
-        return fechaPago;
-    }
-
-    public void setFechaPago(LocalDateTime fechaPago) {
-        this.fechaPago = fechaPago;
-    }
-
- 
 }

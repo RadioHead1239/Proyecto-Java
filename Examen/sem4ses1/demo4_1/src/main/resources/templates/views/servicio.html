@@ -1,53 +1,509 @@
-
 <!doctype html>
 <html lang="es" xmlns:th="http://www.thymeleaf.org">
 <head>
-	<meta charset="utf-8" />
-	<meta name="viewport" content="width=device-width, initial-scale=1" />
-	<title>Clientes · Dashboard</title>
-	<!-- Bootstrap & Icons -->
-	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-	<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
-	<style>
-		:root{ --brand:#0066cc; --brand-2:#00bcd4; } /* ===== SIDEBAR ===== */ .sidebar{ position:fixed; inset-block:0; inset-inline-start:0; width:260px; background:#0b1220; color:#d9e1f2; z-index:1030; overflow-y:auto; } .sidebar .nav-link{ color:#a7b1cc; border-radius:.6rem; } .sidebar .nav-link.active{ background:linear-gradient(135deg, var(--brand), var(--brand-2)); color:#fff; } .sidebar .nav-link:hover{ color:#fff; background:rgba(255,255,255,.06); } .brand{ color:#fff; font-weight:700; letter-spacing:.5px; } .brand small{ color:#7bb6ff; font-weight:500; } .avatar{ width:36px; height:36px; border-radius:50%; object-fit:cover; } /* ===== CONTENT ===== */ .content{ margin-inline-start:260px; min-height:100vh; } .content .topbar{ position:sticky; top:0; z-index:1020; backdrop-filter:saturate(180%) blur(6px); background:rgba(246,248,251,.8); } body { background:#f6f8fb; font-family:"Poppins",sans-serif; } .content { margin-inline-start:260px; min-height:100vh; } .topbar { position:sticky; top:0; z-index:1020; backdrop-filter:saturate(180%) blur(6px); background:rgba(246,248,251,.8); } .card { border-radius:1rem; box-shadow:0 4px 12px rgba(0,0,0,.08); } .btn-primary { background:linear-gradient(135deg,#0066cc,#00bcd4); border:0; } .btn-primary:hover { background:linear-gradient(135deg,#005bb5,#00a2b3); }
-	</style>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Servicios Veterinarios · VetCare</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11.12.4/dist/sweetalert2.min.css" rel="stylesheet">
+  <link href="/css/global.css" rel="stylesheet">
+  
+  <style>
+        :root {
+      --sidebar-bg: linear-gradient(180deg, #84cddb, #b4dadf);
+      --sidebar-hover: rgba(255, 255, 255, 0.15);
+      --sidebar-active: linear-gradient(135deg, #4facfe, #00f2fe);
+      --text-color: #ffffff;
+    }
+  
+    /* Sidebar */
+    .sidebar {
+      position: fixed;
+      inset-block: 0;
+      inset-inline-start: 0;
+      width: 260px;
+      background: var(--sidebar-bg);
+      color: var(--text-color);
+      z-index: 1030;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      border-right: 3px solid rgba(255,255,255,0.1);
+    }
+  
+    /* Logo */
+    .brand-logo {
+      width: 90%;
+      border-radius: 20px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+      transition: transform .3s ease;
+    }
+    .brand-logo:hover {
+      transform: scale(1.05);
+    }
+  
+    /* Menú */
+    .sidebar .nav-link {
+      color: var(--text-color);
+      border-radius: .6rem;
+      padding: .65rem 1rem;
+      display: flex;
+      align-items: center;
+      gap: .6rem;
+      transition: all .2s;
+      font-weight: 500;
+    }
+  
+    .sidebar .nav-link:hover {
+      background: var(--sidebar-hover);
+    }
+  
+    .sidebar .nav-link.active {
+      background: var(--sidebar-active);
+      color: #fff;
+      box-shadow: 0 2px 8px rgba(0,0,0,.3);
+    }
+  
+    /* Footer */
+    .sidebar-footer {
+      padding: 1rem;
+      font-size: .85rem;
+      color: rgba(255,255,255,.8);
+      border-top: 1px solid rgba(255,255,255,.2);
+    }
+  </style>
 </head>
 <body>
-	<aside class="sidebar d-flex flex-column p-3">
-		<a href="/dashboard" class="d-flex align-items-center mb-3 text-decoration-none"> <i class="bi bi-scissors text-primary fs-3 me-2"></i> <span class="brand fs-5">Peluquería <small>Mascotas</small></span> </a>
-		<hr>
-		<ul class="nav nav-pills flex-column mb-auto">
-			<li><a href="/dashboard" class="nav-link active"><i class="bi bi-speedometer2 me-2"></i> Dashboard</a></li>
-			<li><a href="/cliente" class="nav-link"><i class="bi bi-people me-2"></i> Clientes</a></li>
-			<li><a href="/mascota" class="nav-link"><i class="bi bi-bag-heart me-2"></i> Mascotas</a></li>
-			<li><a href="/cita" class="nav-link"><i class="bi bi-calendar2-week me-2"></i> Citas</a></li>
-			<li><a href="/venta" class="nav-link"><i class="bi bi-receipt me-2"></i> Ventas</a></li>
-			<li><a href="/producto" class="nav-link"><i class="bi bi-box-seam me-2"></i> Productos</a></li>
-			<li><a href="/usuario" class="nav-link"><i class="bi bi-person-gear me-2"></i> Usuarios</a></li>
-		</ul>
-		<hr>
-		<div class="dropdown">
-			<a href="#" class="d-flex align-items-center text-decoration-none dropdown-toggle" data-bs-toggle="dropdown"> <img src="https://i.pravatar.cc/40" alt="user" class="avatar me-2"> <strong>Admin</strong> </a>
-			<ul class="dropdown-menu dropdown-menu-dark shadow">
-				<li><a class="dropdown-item" href="#">Perfil</a></li>
-				<li><a class="dropdown-item" href="#">Configuración</a></li>
-				<li>
-					<hr class="dropdown-divider">
-				</li>
-				<li><a class="dropdown-item" href="#">Cerrar sesión</a></li>
-			</ul>
-		</div>
-	</aside>
-	<section id="view-servicios" class="app-view">
-  <div class="d-flex justify-content-between mb-3">
-    <h5><i class="bi bi-tools me-2"></i>Servicios</h5>
-    <button class="btn btn-primary"><i class="bi bi-plus-lg"></i> Nuevo Servicio</button>
+  
+  <aside class="sidebar d-flex flex-column p-3">
+    
+    <div class="brand mb-4 text-center">
+      <img src="https://marketplace.canva.com/EAGre3wkiKc/1/0/1600w/canva-logotipo-veterinaria-ilustrado-lindo-azul-aqua-beige-g5Mq7lvYdmg.jpg" 
+           alt="VetCare Logo" 
+           class="brand-logo">
+    </div>
+  
+    
+    <ul class="nav flex-column gap-1">
+      <li><a href="/dashboard" class="nav-link"><i class="bi bi-speedometer2 me-2"></i>Dashboard</a></li>
+      <li><a href="/cliente" class="nav-link"><i class="bi bi-people me-2"></i>Clientes</a></li>
+      <li><a href="/mascota" class="nav-link"><i class="bi bi-bag-heart me-2"></i>Mascotas</a></li>
+      <li><a href="/cita" class="nav-link"><i class="bi bi-calendar2-week me-2"></i>Citas</a></li>
+      <li><a href="/venta" class="nav-link"><i class="bi bi-receipt me-2"></i>Ventas</a></li>
+      <li><a href="/producto" class="nav-link"><i class="bi bi-box-seam me-2"></i>Productos</a></li>
+      <li><a href="/usuario" class="nav-link"><i class="bi bi-person-gear me-2"></i>Usuarios</a></li>
+      <li><a href="/pago" class="nav-link"><i class="bi bi-cash-coin me-2"></i>Pagos</a></li>
+      <li><a href="/servicio" class="nav-link"><i class="bi bi-scissors me-2"></i>Servicios</a></li>
+    </ul>
+  
+    
+    <div class="sidebar-footer mt-auto text-center small">
+      © 2025 VetCare
+    </div>
+  </aside>
+
+  
+  <main class="content">
+    <div class="topbar d-flex align-items-center justify-content-between">
+      <div>
+        <h5 class="mb-0"><i class="bi bi-heart-pulse me-2"></i>Servicios Veterinarios</h5>
+        <small class="text-muted">Administra los servicios de la clínica veterinaria</small>
+      </div>
+      <div class="d-flex gap-2">
+        <button class="btn btn-outline-primary btn-sm" onclick="exportarServicios()">
+          <i class="bi bi-download me-1"></i> Exportar
+        </button>
+        <button class="btn btn-success btn-sm" data-bs-toggle="modal" data-bs-target="#servicioModal">
+          <i class="bi bi-plus-lg me-1"></i> Nuevo Servicio
+        </button>
+      </div>
+    </div>
+
+    <div class="container-fluid py-4">
+      
+      <div class="card mb-4">
+        <div class="card-body">
+          <div class="row g-3">
+            <div class="col-md-4">
+              <label class="form-label">Buscar servicio</label>
+              <div class="input-group">
+                <span class="input-group-text"><i class="bi bi-search"></i></span>
+                <input type="text" class="form-control" id="searchInput" placeholder="Nombre o descripción...">
+              </div>
+            </div>
+            <div class="col-md-3">
+              <label class="form-label">Ordenar por</label>
+              <select class="form-select" id="sortSelect">
+                <option value="nombre_asc">Nombre A-Z</option>
+                <option value="precio_asc">Precio (menor)</option>
+                <option value="precio_desc">Precio (mayor)</option>
+              </select>
+            </div>
+            <div class="col-md-3">
+              <label class="form-label">Mostrar</label>
+              <select class="form-select" id="limitSelect">
+                <option value="25" selected>25 registros</option>
+                <option value="50">50 registros</option>
+                <option value="100">100 registros</option>
+              </select>
+            </div>
+            <div class="col-md-2 d-flex align-items-end">
+              <button class="btn btn-outline-secondary w-100" onclick="limpiarFiltros()">
+                <i class="bi bi-arrow-clockwise me-1"></i> Limpiar
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      
+      <div class="row" id="serviciosGrid">
+        
+      </div>
+    </div>
+  </main>
+
+  
+  <div class="modal fade" id="servicioModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+      <div class="modal-content">
+        <form id="formServicio">
+          <div class="modal-header bg-success text-white">
+            <h5 class="modal-title">
+              <i class="bi bi-heart-pulse me-2"></i>
+              <span id="modalTitle">Registrar Servicio</span>
+            </h5>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+          </div>
+          <div class="modal-body">
+            <div class="row g-3">
+              <div class="col-md-8">
+                <label class="form-label">Nombre del Servicio <span class="text-danger">*</span></label>
+                <input type="text" class="form-control" name="nombre" id="nombre" required 
+                       placeholder="Ej: Baño y corte completo">
+              </div>
+              <div class="col-md-4">
+                <label class="form-label">Precio (S/) <span class="text-danger">*</span></label>
+                <input type="number" class="form-control" name="precio" id="precio" required 
+                       min="0" step="0.01" placeholder="0.00">
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">Duración (minutos) <span class="text-danger">*</span></label>
+                <input type="number" class="form-control" name="duracionMinutos" id="duracionMinutos" required 
+                       min="1" placeholder="60">
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">Categoría</label>
+                <select class="form-select" name="categoria" id="categoria">
+                  <option value="">Seleccionar categoría</option>
+                  <option value="Consulta General">Consulta General</option>
+                  <option value="Vacunación">Vacunación</option>
+                  <option value="Cirugía">Cirugía</option>
+                  <option value="Desparasitación">Desparasitación</option>
+                  <option value="Grooming">Grooming</option>
+                  <option value="Emergencias">Emergencias</option>
+                  <option value="Control Preventivo">Control Preventivo</option>
+                  <option value="Tratamiento">Tratamiento</option>
+                </select>
+              </div>
+              <div class="col-12">
+                <label class="form-label">Imágenes del Servicio</label>
+                <input type="text" class="form-control" name="imagen" id="imagen" 
+                       placeholder="https://ejemplo.com/imagen1.jpg;https://ejemplo.com/imagen2.jpg">
+                <div class="form-text">Separa múltiples URLs con punto y coma (;) para mostrar varias imágenes</div>
+              </div>
+              <div class="col-12">
+                <label class="form-label">Descripción</label>
+                <textarea class="form-control" name="descripcion" id="descripcion" rows="4" 
+                          placeholder="Describe los detalles del servicio, qué incluye, etc."></textarea>
+              </div>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
+              <i class="bi bi-x-lg me-1"></i> Cancelar
+            </button>
+            <button type="submit" class="btn btn-primary" id="btnGuardar">
+              <i class="bi bi-check-lg me-1"></i> Guardar
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
   </div>
-  <div class="row" id="gridServicios"></div>
-</section>
-	
-	
-	
-	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+  
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.12.4/dist/sweetalert2.all.min.js"></script>
+  <script src="/js/utils.js"></script>
+  <script>
+    let servicios = [];
+    let servicioEditando = null;
+
+    document.addEventListener("DOMContentLoaded", function() {
+      loadServicios();
+      setupEventListeners();
+    });
+
+    function setupEventListeners() {
+      document.getElementById('searchInput').addEventListener('input', debounce(filterServicios, 300));
+      document.getElementById('sortSelect').addEventListener('change', loadServicios);
+      document.getElementById('limitSelect').addEventListener('change', loadServicios);
+      document.getElementById('formServicio').addEventListener('submit', handleSubmitServicio);
+    }
+
+    async function loadServicios() {
+      try {
+        const res = await fetch("/api/servicios");
+        if (!res.ok) throw new Error('Error al cargar servicios');
+        
+        const data = await res.json();
+        servicios = data;
+        renderServicios();
+      } catch (error) {
+        console.error("Error:", error);
+        showError("Error al cargar los servicios");
+      }
+    }
+
+    function renderServicios() {
+      const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+      const sortBy = document.getElementById('sortSelect').value;
+      
+      let filteredServicios = servicios.filter(servicio => {
+        if (!searchTerm) return true;
+        const nombre = servicio.nombre?.toLowerCase() || '';
+        const descripcion = servicio.descripcion?.toLowerCase() || '';
+        return nombre.includes(searchTerm) || descripcion.includes(searchTerm);
+      });
+
+      filteredServicios.sort((a, b) => {
+        switch(sortBy) {
+          case 'nombre_asc':
+            return (a.nombre || '').localeCompare(b.nombre || '');
+          case 'precio_asc':
+            return (a.precio || 0) - (b.precio || 0);
+          case 'precio_desc':
+            return (b.precio || 0) - (a.precio || 0);
+          default:
+            return 0;
+        }
+      });
+
+      renderServiciosGrid(filteredServicios);
+    }
+
+    function renderServiciosGrid(servicios) {
+      const grid = document.getElementById('serviciosGrid');
+      grid.innerHTML = '';
+      
+      if (servicios.length === 0) {
+        grid.innerHTML = `
+          <div class="col-12 text-center py-5">
+            <i class="bi bi-scissors fs-1 text-muted"></i>
+            <p class="text-muted mt-2">No se encontraron servicios</p>
+          </div>
+        `;
+        return;
+      }
+
+      grid.innerHTML = servicios.map(servicio => {
+        const images = VetCareUtils.parseImages(servicio.imagen);
+        const primaryImage = images.length > 0 ? images[0] : 'https://images.unsplash.com/photo-1601758123927-1975a5e2b94c?q=80&w=400';
+        
+        return `
+        <div class="col-md-6 col-lg-4 mb-4">
+          <div class="card h-100 shadow-sm border-0" style="transition: transform 0.3s ease, box-shadow 0.3s ease;">
+            <div class="card-img-top position-relative" style="height: 200px; overflow: hidden; cursor: pointer;" 
+                 onclick="showServiceImages('${servicio.nombre}', '${servicio.imagen || ''}')">
+              <img src="${primaryImage}" 
+                   class="w-100 h-100 object-fit-cover" alt="${servicio.nombre}" 
+                   style="transition: transform 0.3s ease;">
+              ${images.length > 1 ? `
+                <div class="position-absolute top-0 start-0 m-2">
+                  <span class="badge bg-info">
+                    <i class="bi bi-images me-1"></i>${images.length}
+                  </span>
+                </div>
+              ` : ''}
+              <div class="position-absolute bottom-0 start-0 end-0 bg-gradient bg-opacity-75 p-2">
+                <small class="text-white fw-semibold">
+                  <i class="bi bi-images me-1"></i>Ver imágenes
+                </small>
+              </div>
+            </div>
+            <div class="card-body d-flex flex-column">
+              <h6 class="card-title text-truncate" title="${servicio.nombre}">${servicio.nombre}</h6>
+              <p class="card-text text-muted small">${servicio.descripcion ? servicio.descripcion.substring(0, 80) + (servicio.descripcion.length > 80 ? '...' : '') : 'Sin descripción'}</p>
+              <div class="mt-auto">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                  <span class="badge bg-success">${VetCareUtils.formatCurrency(servicio.precio)}</span>
+                  <span class="text-muted small">
+                    <i class="bi bi-clock me-1"></i>${servicio.duracionMinutos} min
+                  </span>
+                </div>
+                <div class="btn-group w-100">
+                  <button class="btn btn-outline-success btn-sm" onclick="editarServicio(${servicio.id})" title="Editar">
+                    <i class="bi bi-pencil"></i>
+                  </button>
+                  <button class="btn btn-outline-danger btn-sm" onclick="eliminarServicio(${servicio.id})" title="Eliminar">
+                    <i class="bi bi-trash"></i>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        `;
+      }).join('');
+    }
+
+    // Función para mostrar imágenes de servicios
+    function showServiceImages(nombre, imagenString) {
+      const images = VetCareUtils.parseImages(imagenString);
+      VetCareUtils.showImageModal(nombre, images);
+    }
+
+    function filterServicios() {
+      renderServicios();
+    }
+
+    function limpiarFiltros() {
+      document.getElementById('searchInput').value = '';
+      document.getElementById('sortSelect').value = 'nombre_asc';
+      document.getElementById('limitSelect').value = '25';
+      renderServicios();
+    }
+
+    async function handleSubmitServicio(e) {
+      e.preventDefault();
+      
+      const formData = new FormData(e.target);
+      const servicioData = {
+        nombre: formData.get('nombre'),
+        descripcion: formData.get('descripcion'),
+        precio: parseFloat(formData.get('precio')) || 0,
+        duracionMinutos: parseInt(formData.get('duracionMinutos')) || 30,
+        categoria: formData.get('categoria'),
+        imagen: formData.get('imagen'),
+        activo: formData.get('activo') === 'on' || formData.get('activo') === 'true'
+      };
+      
+      try {
+        const url = servicioEditando ? `/api/servicios/${servicioEditando}` : '/api/servicios';
+        const method = servicioEditando ? 'PUT' : 'POST';
+        
+        const response = await fetch(url, {
+          method: method,
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(servicioData)
+        });
+
+        if (!response.ok) throw new Error('Error al guardar servicio');
+
+        showSuccess(servicioEditando ? 'Servicio actualizado correctamente' : 'Servicio registrado correctamente');
+        
+        bootstrap.Modal.getInstance(document.getElementById('servicioModal')).hide();
+        document.getElementById('formServicio').reset();
+        servicioEditando = null;
+        loadServicios();
+        
+      } catch (error) {
+        console.error('Error:', error);
+        showError('Error al guardar el servicio');
+      }
+    }
+
+    function editarServicio(id) {
+      const servicio = servicios.find(s => s.id === id);
+      if (!servicio) return;
+
+      servicioEditando = id;
+      document.getElementById('modalTitle').textContent = 'Editar Servicio';
+      document.getElementById('btnGuardar').innerHTML = '<i class="bi bi-check-lg me-1"></i> Actualizar';
+      
+      document.getElementById('nombre').value = servicio.nombre || '';
+      document.getElementById('precio').value = servicio.precio || '';
+      document.getElementById('duracionMinutos').value = servicio.duracionMinutos || '';
+      document.getElementById('categoria').value = servicio.categoria || '';
+      document.getElementById('descripcion').value = servicio.descripcion || '';
+      document.getElementById('imagen').value = servicio.imagen || '';
+      document.getElementById('activo').checked = servicio.activo || false;
+      
+      new bootstrap.Modal(document.getElementById('servicioModal')).show();
+    }
+
+    async function eliminarServicio(id) {
+      const servicio = servicios.find(s => s.id === id);
+      if (!servicio) return;
+
+      const result = await Swal.fire({
+        title: '¿Estás seguro?',
+        text: `Se eliminará el servicio ${servicio.nombre}`,
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#3085d6',
+        confirmButtonText: 'Sí, eliminar',
+        cancelButtonText: 'Cancelar'
+      });
+
+      if (result.isConfirmed) {
+        try {
+          const response = await fetch(`/api/servicios/${id}`, { method: 'DELETE' });
+          if (!response.ok) throw new Error('Error al eliminar servicio');
+
+          showSuccess('Servicio eliminado correctamente');
+          loadServicios();
+        } catch (error) {
+          console.error('Error:', error);
+          showError('Error al eliminar el servicio');
+        }
+      }
+    }
+
+    function exportarServicios() {
+      showInfo('Función de exportación en desarrollo');
+    }
+
+    function debounce(func, wait) {
+      let timeout;
+      return function executedFunction(...args) {
+        const later = () => {
+          clearTimeout(timeout);
+          func(...args);
+        };
+        clearTimeout(timeout);
+        timeout = setTimeout(later, wait);
+      };
+    }
+
+    function showSuccess(message) {
+      Swal.fire({
+        title: '¡Éxito!',
+        text: message,
+        icon: 'success',
+        timer: 2000,
+        showConfirmButton: false
+      });
+    }
+
+    function showError(message) {
+      Swal.fire({
+        title: 'Error',
+        text: message,
+        icon: 'error'
+      });
+    }
+
+    function showInfo(message) {
+      Swal.fire({
+        title: 'Información',
+        text: message,
+        icon: 'info'
+      });
+    }
+  </script>
 </body>
 </html>

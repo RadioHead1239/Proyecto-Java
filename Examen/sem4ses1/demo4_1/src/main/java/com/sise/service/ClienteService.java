@@ -1,56 +1,74 @@
 package com.sise.service;
 
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
+import org.springframework.stereotype.Service;
+
 import com.sise.dto.ClienteDTO;
 import com.sise.iservice.IClienteService;
 import com.sise.mapper.ClienteMapper;
 import com.sise.model.Cliente;
 import com.sise.repository.ClienteRepository;
 
-import org.springframework.stereotype.Service;
-
-import java.time.LocalDate;
-import java.util.List;
-
 @Service
 public class ClienteService implements IClienteService {
 
-    private final ClienteRepository repo;
+    private final ClienteRepository clienteRepository;
+    private final ClienteMapper clienteMapper;
 
-    public ClienteService(ClienteRepository repo) {
-        this.repo = repo;
+    public ClienteService(ClienteRepository clienteRepository, ClienteMapper clienteMapper) {
+        this.clienteRepository = clienteRepository;
+        this.clienteMapper = clienteMapper;
     }
 
     @Override
-    public List<ClienteDTO> listar() {
-        return repo.findAll()
-                   .stream().map(ClienteMapper::toDTO).toList();
+    public List<ClienteDTO> findAll() {
+        List<Cliente> clientes = clienteRepository.findAll();
+        return clientes.stream()
+                .map(clienteMapper::toDTO)
+                .collect(Collectors.toList());
     }
 
     @Override
-    public ClienteDTO buscarPorId(Long id) {
-        return repo.findById(id).map(ClienteMapper::toDTO).orElse(null);
+    public Optional<ClienteDTO> findById(Long id) {
+        return clienteRepository.findById(id)
+                .map(clienteMapper::toDTO);
     }
 
     @Override
-    public ClienteDTO registrar(ClienteDTO dto) {
-        Cliente cliente = ClienteMapper.toEntity(dto);
-        cliente.setFechaRegistro(LocalDate.now());
-        return ClienteMapper.toDTO(repo.save(cliente));
+    public ClienteDTO save(ClienteDTO clienteDTO) {
+        Cliente cliente = clienteMapper.toEntity(clienteDTO);
+        Cliente savedCliente = clienteRepository.save(cliente);
+        return clienteMapper.toDTO(savedCliente);
     }
 
     @Override
-    public ClienteDTO actualizar(Long id, ClienteDTO dto) {
-        return repo.findById(id).map(c -> {
-            c.setNombre(dto.getNombre());
-            c.setApellido(dto.getApellido());
-            c.setTelefono(dto.getTelefono());
-            c.setCorreo(dto.getCorreo());
-            return ClienteMapper.toDTO(repo.save(c));
-        }).orElse(null);
+    public boolean deleteById(Long id) {
+        if (clienteRepository.existsById(id)) {
+            clienteRepository.deleteById(id);
+            return true;
+        }
+        return false;
     }
 
     @Override
-    public void eliminar(Long id) {
-        repo.deleteById(id);
+    public List<ClienteDTO> buscarPorTermino(String termino) {
+        List<Cliente> clientes = clienteRepository.buscarPorTermino(termino);
+        return clientes.stream()
+                .map(clienteMapper::toDTO)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public Long contarTotalClientes() {
+        return clienteRepository.contarTotalClientes();
+    }
+
+    @Override
+    public Optional<ClienteDTO> findByCorreo(String correo) {
+        return clienteRepository.findByCorreo(correo)
+                .map(clienteMapper::toDTO);
     }
 }

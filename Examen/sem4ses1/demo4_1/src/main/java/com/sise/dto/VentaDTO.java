@@ -1,44 +1,28 @@
 package com.sise.dto;
 
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
 
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class VentaDTO {
     private Long id;
-    private String cliente;
     private LocalDateTime fecha;
     private BigDecimal total;
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public String getCliente() {
-        return cliente;
-    }
-
-    public void setCliente(String cliente) {
-        this.cliente = cliente;
-    }
-
-    public LocalDateTime getFecha() {
-        return fecha;
-    }
-
-    public void setFecha(LocalDateTime fecha) {
-        this.fecha = fecha;
-    }
-
-    public BigDecimal getTotal() {
-        return total;
-    }
-
-    public void setTotal(BigDecimal total) {
-        this.total = total;
-    }
-
+    private String estado;
+    private String observaciones;
+    private Long idCliente;
+    private String cliente;
+    private Long idUsuario;
+    private String usuario;
+    private Long idCita;
+    private String cita;
+    private String servicio;
+    private String mascota;
+    private List<DetalleVentaDTO> detalles;
 }

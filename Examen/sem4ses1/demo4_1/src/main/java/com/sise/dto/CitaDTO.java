@@ -1,61 +1,29 @@
 package com.sise.dto;
 
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class CitaDTO {
     private Long id;
     private LocalDateTime fechaCita;
-    private String cliente;
-    private String mascota;
-    private String servicio;
     private String estado;
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public LocalDateTime getFechaCita() {
-        return fechaCita;
-    }
-
-    public void setFechaCita(LocalDateTime fechaCita) {
-        this.fechaCita = fechaCita;
-    }
-
-    public String getCliente() {
-        return cliente;
-    }
-
-    public void setCliente(String cliente) {
-        this.cliente = cliente;
-    }
-
-    public String getMascota() {
-        return mascota;
-    }
-
-    public void setMascota(String mascota) {
-        this.mascota = mascota;
-    }
-
-    public String getServicio() {
-        return servicio;
-    }
-
-    public void setServicio(String servicio) {
-        this.servicio = servicio;
-    }
-
-    public String getEstado() {
-        return estado;
-    }
-
-    public void setEstado(String estado) {
-        this.estado = estado;
-    }
-
+    private String observaciones;
+    private Long idCliente;
+    private String cliente;
+    private Long idMascota;
+    private String mascota;
+    private Long idServicio;
+    private String servicio;
+    private Long idUsuario;
+    private String usuario;
+    private BigDecimal precioServicio;
+    private Long idVenta;
+    private String venta;
+    private Boolean tieneVenta;
 }

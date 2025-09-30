@@ -1,276 +1,623 @@
 <!doctype html>
-<html lang="es">
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Peluquería Mascotas · Dashboard</title>
+  <title>VetCare · Panel de Control Veterinario</title>
 
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet" />
   <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11.12.4/dist/sweetalert2.min.css" rel="stylesheet" />
-  
-  <style>
-    :root{
-      --brand:#0066cc;
-      --brand-2:#00bcd4;
-    }
-    body{ background:#f6f8fb; font-family:"Poppins",sans-serif; }
+  <link href="/css/global.css" rel="stylesheet">
 
-    /* ===== SIDEBAR ===== */
-    .sidebar{
-      position:fixed; inset-block:0; inset-inline-start:0; width:260px; 
-      background:#0b1220; color:#d9e1f2; z-index:1030; overflow-y:auto;
+  <style>
+    :root {
+      --sidebar-bg: linear-gradient(180deg, #84cddb, #b4dadf);
+      --sidebar-hover: rgba(255, 255, 255, 0.15);
+      --sidebar-active: linear-gradient(135deg, #4facfe, #00f2fe);
+      --text-color: #ffffff;
     }
-    .sidebar .nav-link{ color:#a7b1cc; border-radius:.6rem; }
-    .sidebar .nav-link.active{ background:linear-gradient(135deg, var(--brand), var(--brand-2)); color:#fff; }
-    .sidebar .nav-link:hover{ color:#fff; background:rgba(255,255,255,.06); }
-    .brand{ color:#fff; font-weight:700; letter-spacing:.5px; }
-    .brand small{ color:#7bb6ff; font-weight:500; }
-    .avatar{ width:36px; height:36px; border-radius:50%; object-fit:cover; }
+  
+    /* Sidebar */
+    .sidebar {
+      position: fixed;
+      inset-block: 0;
+      inset-inline-start: 0;
+      width: 260px;
+      background: var(--sidebar-bg);
+      color: var(--text-color);
+      z-index: 1030;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      border-right: 3px solid rgba(255,255,255,0.1);
+    }
+  
+    /* Logo */
+    .brand-logo {
+      width: 90%;
+      border-radius: 20px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+      transition: transform .3s ease;
+    }
+    .brand-logo:hover {
+      transform: scale(1.05);
+    }
+  
+    /* Menú */
+    .sidebar .nav-link {
+      color: var(--text-color);
+      border-radius: .6rem;
+      padding: .65rem 1rem;
+      display: flex;
+      align-items: center;
+      gap: .6rem;
+      transition: all .2s;
+      font-weight: 500;
+    }
+  
+    .sidebar .nav-link:hover {
+      background: var(--sidebar-hover);
+    }
+  
+    .sidebar .nav-link.active {
+      background: var(--sidebar-active);
+      color: #fff;
+      box-shadow: 0 2px 8px rgba(0,0,0,.3);
+    }
+  
+    /* Footer */
+    .sidebar-footer {
+      padding: 1rem;
+      font-size: .85rem;
+      color: rgba(255,255,255,.8);
+      border-top: 1px solid rgba(255,255,255,.2);
+    }
 
     /* ===== CONTENT ===== */
-    .content{ margin-inline-start:260px; min-height:100vh; }
-    .content .topbar{
-      position:sticky; top:0; z-index:1020;
-      backdrop-filter:saturate(180%) blur(6px); 
-      background:rgba(246,248,251,.8);
-    } 
+    .content {
+      margin-left: 257px;
+    }
 
-    .card-kpi{ border:0; border-radius:1rem; box-shadow:0 8px 20px rgba(12,21,47,.06); }
-    .kpi-icon{ font-size:1.8rem; padding:.8rem; border-radius:.8rem; background:#eef5ff; color:var(--brand); }
-    .table-rounded{ overflow:hidden; border-radius:1rem; }
+    .hero-section {
+      background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+      color: white;
+      padding: 2rem 0;
+      margin-bottom: 2rem;
+    }
+
+    /* ===== CARDS ===== */
+    .stats-card {
+      background: white;
+      border-radius: 1rem;
+      padding: 1.5rem;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+      border: 1px solid #e9ecef;
+      transition: all 0.3s ease;
+      height: 100%;
+    }
+
+    .stats-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+    }
+
+    .stats-icon {
+      width: 60px;
+      height: 60px;
+      border-radius: 1rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+      color: white;
+      margin-bottom: 1rem;
+    }
+
+    .stats-number {
+      font-size: 2rem;
+      font-weight: 700;
+      color: #2c3e50;
+      margin-bottom: 0.25rem;
+    }
+
+    .stats-label {
+      color: #6c757d;
+      font-size: 0.9rem;
+      font-weight: 500;
+    }
+
+    /* ===== CHARTS ===== */
+    .chart-container {
+      background: white;
+      border-radius: 1rem;
+      padding: 1.5rem;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+      border: 1px solid #e9ecef;
+    }
+
+    .chart-title {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: #2c3e50;
+      margin-bottom: 1rem;
+    }
+
+    /* ===== ACTIVITY ===== */
+    .activity-item {
+      padding: 1rem;
+      border-bottom: 1px solid #f8f9fa;
+      transition: background-color 0.2s;
+    }
+
+    .activity-item:hover {
+      background-color: #f8f9fa;
+    }
+
+    .activity-item:last-child {
+      border-bottom: none;
+    }
+
+    .badge-status {
+      font-size: 0.75rem;
+      padding: 0.375rem 0.75rem;
+    }
   </style>
 </head>
 <body>
-  
-  <aside class="sidebar d-flex flex-column p-3">
-    <a href="/dashboard" class="d-flex align-items-center mb-3 text-decoration-none">
-      <i class="bi bi-scissors text-primary fs-3 me-2"></i>
-      <span class="brand fs-5">Peluquería <small>Mascotas</small></span>
-    </a>
-    <hr>
-    <ul class="nav nav-pills flex-column mb-auto">
-      <li><a href="/dashboard" class="nav-link active"><i class="bi bi-speedometer2 me-2"></i> Dashboard</a></li>
-      <li><a href="/cliente" class="nav-link"><i class="bi bi-people me-2"></i> Clientes</a></li>
-      <li><a href="/mascota" class="nav-link"><i class="bi bi-bag-heart me-2"></i> Mascotas</a></li>
-      <li><a href="/cita" class="nav-link"><i class="bi bi-calendar2-week me-2"></i> Citas</a></li>
-      <li><a href="/venta" class="nav-link"><i class="bi bi-receipt me-2"></i> Ventas</a></li>
-      <li><a href="/producto" class="nav-link"><i class="bi bi-box-seam me-2"></i> Productos</a></li>
-      <li><a href="/usuario" class="nav-link"><i class="bi bi-person-gear me-2"></i> Usuarios</a></li>
-    </ul>
-    <hr>
-    <div class="dropdown">
-      <a href="#" class="d-flex align-items-center text-decoration-none dropdown-toggle" data-bs-toggle="dropdown">
-        <img src="https://i.pravatar.cc/40" alt="user" class="avatar me-2">
-        <strong>Admin</strong>
-      </a>
-      <ul class="dropdown-menu dropdown-menu-dark shadow">
-        <li><a class="dropdown-item" href="#">Perfil</a></li>
-        <li><a class="dropdown-item" href="#">Configuración</a></li>
-        <li><hr class="dropdown-divider"></li>
-        <li><a class="dropdown-item" href="#">Cerrar sesión</a></li>
-      </ul>
-    </div>
-  </aside>
+    
+<aside class="sidebar d-flex flex-column p-3">
+  <div class="brand mb-4 text-center">
+    <img src="https://marketplace.canva.com/EAGre3wkiKc/1/0/1600w/canva-logotipo-veterinaria-ilustrado-lindo-azul-aqua-beige-g5Mq7lvYdmg.jpg" 
+         alt="VetCare Logo" 
+         class="brand-logo">
+  </div>
 
-  <!-- ===== CONTENT ===== -->
-  <main class="content">
-    <div class="topbar border-bottom">
-      <div class="container-fluid py-3 d-flex align-items-center justify-content-between">
-        <h1 class="h5 mb-0">Dashboard</h1>
-        <button class="btn btn-outline-secondary btn-sm" onclick="showToast('Notificaciones','Tienes 2 citas nuevas para hoy.')"><i class="bi bi-bell"></i></button>
+
+  <ul class="nav flex-column gap-1">
+    <li><a href="/dashboard" class="nav-link"><i class="bi bi-speedometer2 me-2"></i>Dashboard</a></li>
+    <li><a href="/cliente" class="nav-link"><i class="bi bi-people me-2"></i>Clientes</a></li>
+    <li><a href="/mascota" class="nav-link"><i class="bi bi-bag-heart me-2"></i>Mascotas</a></li>
+    <li><a href="/cita" class="nav-link"><i class="bi bi-calendar2-week me-2"></i>Citas</a></li>
+    <li><a href="/venta" class="nav-link"><i class="bi bi-receipt me-2"></i>Ventas</a></li>
+    <li><a href="/producto" class="nav-link"><i class="bi bi-box-seam me-2"></i>Productos</a></li>
+    <li><a href="/usuario" class="nav-link"><i class="bi bi-person-gear me-2"></i>Usuarios</a></li>
+    <li><a href="/pago" class="nav-link"><i class="bi bi-cash-coin me-2"></i>Pagos</a></li>
+    <li><a href="/servicio" class="nav-link"><i class="bi bi-scissors me-2"></i>Servicios</a></li>
+  </ul>
+
+  <div class="sidebar-footer mt-auto text-center small">
+    © 2025 VetCare
+  </div>
+</aside>
+
+
+  <main class="content" role="main">
+    <section class="hero-section">
+      <div class="container">
+        <div class="row align-items-center">
+          <div class="col-md-8">
+            <h1 class="display-5 fw-bold mb-3">
+              <i class="bi bi-heart-pulse me-3" aria-hidden="true"></i>
+              Panel de Control Veterinario
+            </h1>
+            <p class="lead mb-0">Gestiona tu clínica veterinaria y el cuidado de las mascotas</p>
+          </div>
+          <div class="col-md-4 text-end">
+            <div class="d-flex align-items-center justify-content-end">
+              <div class="me-3">
+                <div class="text-white-50 small">Bienvenido</div>
+                <div class="fw-semibold">Dr. Veterinario</div>
+              </div>
+              <img src="https://i.pravatar.cc/60" alt="Foto del usuario" class="rounded-circle" width="50" height="50">
+            </div>
+          </div>
+        </div>
       </div>
-    </div>
+    </section>
 
-    <div class="container-fluid py-4">
-      
-      <!-- ===== DASHBOARD ===== -->
-      <section id="view-dashboard" class="app-view">
-        <div class="row g-3">
-          <div class="col-12 col-sm-6 col-xl-3">
-            <div class="card card-kpi p-3">
-              <div class="d-flex align-items-center justify-content-between">
-                <div>
-                  <div class="text-secondary small">Clientes</div>
-                  <div class="fs-3 fw-bold" id="kpiClientes">0</div>
-                </div>
-                <i class="bi bi-people kpi-icon"></i>
+    <section class="container-fluid py-4">
+      <div class="row g-4 mb-4">
+        <div class="col-xl-3 col-md-6">
+          <div class="stats-card">
+            <div class="d-flex align-items-center">
+              <div class="stats-icon" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                <i class="bi bi-people" aria-hidden="true"></i>
+              </div>
+              <div class="ms-3">
+                <div class="stats-number" th:text="${dashboard.totalClientes}">0</div>
+                <div class="stats-label">Clientes Registrados</div>
               </div>
             </div>
           </div>
-          <div class="col-12 col-sm-6 col-xl-3">
-            <div class="card card-kpi p-3">
-              <div class="d-flex align-items-center justify-content-between">
-                <div>
-                  <div class="text-secondary small">Mascotas</div>
-                  <div class="fs-3 fw-bold" id="kpiMascotas">0</div>
-                </div>
-                <i class="bi bi-bag-heart kpi-icon"></i>
+        </div>
+        <div class="col-xl-3 col-md-6">
+          <div class="stats-card">
+            <div class="d-flex align-items-center">
+              <div class="stats-icon" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
+                <i class="bi bi-heart" aria-hidden="true"></i>
+              </div>
+              <div class="ms-3">
+                <div class="stats-number" th:text="${dashboard.totalMascotas}">0</div>
+                <div class="stats-label">Mascotas Atendidas</div>
               </div>
             </div>
           </div>
-          <div class="col-12 col-sm-6 col-xl-3">
-            <div class="card card-kpi p-3">
-              <div class="d-flex align-items-center justify-content-between">
-                <div>
-                  <div class="text-secondary small">Citas Hoy</div>
-                  <div class="fs-3 fw-bold" id="kpiCitas">0</div>
-                </div>
-                <i class="bi bi-calendar2-week kpi-icon"></i>
+        </div>
+        <div class="col-xl-3 col-md-6">
+          <div class="stats-card">
+            <div class="d-flex align-items-center">
+              <div class="stats-icon" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);">
+                <i class="bi bi-calendar-check" aria-hidden="true"></i>
+              </div>
+              <div class="ms-3">
+                <div class="stats-number" th:text="${dashboard.citasHoy}">0</div>
+                <div class="stats-label">Citas Hoy</div>
               </div>
             </div>
           </div>
-          <div class="col-12 col-sm-6 col-xl-3">
-            <div class="card card-kpi p-3">
-              <div class="d-flex align-items-center justify-content-between">
+        </div>
+        <div class="col-xl-3 col-md-6">
+          <div class="stats-card">
+            <div class="d-flex align-items-center">
+              <div class="stats-icon" style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);">
+                <i class="bi bi-currency-dollar" aria-hidden="true"></i>
+              </div>
+              <div class="ms-3">
+                <div class="stats-number" th:text="${#numbers.formatDecimal(dashboard.ingresosHoy, 1, 2)}">S/ 0.00</div>
+                <div class="stats-label">Ingresos del Día</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="row g-4">
+        <div class="col-xl-8">
+          <div class="chart-container">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+              <h5 class="chart-title mb-0"><i class="bi bi-graph-up me-2"></i>Ingresos de la Semana</h5>
+              <div class="btn-group btn-group-sm" role="group">
+                <button type="button" class="btn btn-outline-primary active">7 días</button>
+                <button type="button" class="btn btn-outline-primary">30 días</button>
+                <button type="button" class="btn btn-outline-primary">90 días</button>
+              </div>
+            </div>
+            <div style="position: relative; height: 300px;"><canvas id="ingresosChart"></canvas></div>
+          </div>
+        </div>
+        <div class="col-xl-4">
+          <div class="chart-container">
+            <h5 class="chart-title"><i class="bi bi-pie-chart me-2"></i>Distribución de Mascotas</h5>
+            <div style="position: relative; height: 250px;"><canvas id="mascotasChart"></canvas></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="row g-4 mt-4">
+        <div class="col-xl-6">
+          <div class="chart-container">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+              <h5 class="chart-title mb-0"><i class="bi bi-calendar-event me-2"></i>Próximas Citas</h5>
+              <a href="/cita" class="btn btn-outline-primary btn-sm"><i class="bi bi-plus"></i> Nueva Cita</a>
+            </div>
+            <div class="list-group list-group-flush">
+              <div class="activity-item d-flex justify-content-between align-items-start">
                 <div>
-                  <div class="text-secondary small">Ingresos Hoy</div>
-                  <div class="fs-3 fw-bold" id="kpiIngresos">S/ 0.00</div>
+                  <h6 class="mb-1"><i class="bi bi-heart me-2 text-danger"></i>Max - Baño y Corte</h6>
+                  <p class="mb-1 text-muted small"><i class="bi bi-clock me-1"></i>10:00 AM - María González</p>
+                  <small class="text-muted">Golden Retriever, 3 años</small>
                 </div>
-                <i class="bi bi-cash-coin kpi-icon"></i>
+                <span class="badge bg-primary badge-status">Confirmada</span>
               </div>
             </div>
           </div>
         </div>
 
-        <div class="row g-3 mt-1">
-          <div class="col-12 col-xl-8">
-            <div class="card p-3" style="border-radius:1rem;">
-              <h6>Ventas de Productos (últimas 8 semanas)</h6>
-              <canvas id="ventasChart" height="120"></canvas>
+        <div class="col-xl-6">
+          <div class="chart-container">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+              <h5 class="chart-title mb-0"><i class="bi bi-cart-check me-2"></i>Ventas Recientes</h5>
+              <a href="/venta" class="btn btn-outline-primary btn-sm"><i class="bi bi-plus"></i> Nueva Venta</a>
             </div>
-          </div>
-          <div class="col-12 col-xl-4">
-            <div class="card p-3" style="border-radius:1rem;">
-              <h6>Distribución de Mascotas</h6>
-              <canvas id="especiesChart" height="220"></canvas>
-            </div>
-          </div>
-        </div>
-
-        <div class="row g-3 mt-1">
-          <div class="col-12 col-xxl-6">
-            <div class="card table-rounded">
-              <div class="card-header bg-light"><strong>Citas próximas</strong></div>
-              <div class="table-responsive">
-                <table class="table align-middle mb-0">
-                  <thead class="table-light">
-                    <tr>
-                      <th>Fecha & hora</th>
-                      <th>Cliente</th>
-                      <th>Mascota</th>
-                      <th>Servicio</th>
-                      <th>Estado</th>
-                    </tr>
-                  </thead>
-                  <tbody id="tbodyCitas"></tbody>
-                </table>
-              </div>
-            </div>
-          </div>
-          <div class="col-12 col-xxl-6">
-            <div class="card table-rounded">
-              <div class="card-header bg-light"><strong>Últimas ventas</strong></div>
-              <div class="table-responsive">
-                <table class="table align-middle mb-0">
-                  <thead class="table-light">
-                    <tr>
-                      <th>#</th>
-                      <th>Cliente</th>
-                      <th>Fecha</th>
-                      <th>Total</th>
-                    </tr>
-                  </thead>
-                  <tbody id="tbodyVentas"></tbody>
-                </table>
+            <div class="list-group list-group-flush">
+              <div class="activity-item d-flex justify-content-between align-items-center">
+                <div>
+                  <h6 class="mb-1"><i class="bi bi-box me-2 text-primary"></i>Shampoo Antialérgico</h6>
+                  <small class="text-muted">Cliente: María González</small>
+                </div>
+                <div class="text-end">
+                  <div class="fw-bold text-success">S/ 45.00</div>
+                  <small class="text-muted">Hace 2 horas</small>
+                </div>
               </div>
             </div>
           </div>
         </div>
-      </section>
-
-    </div>
+      </div>
+    </section>
   </main>
 
-  <!-- ===== SCRIPTS ===== -->
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.12.4/dist/sweetalert2.all.min.js"></script>
-
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js" defer></script>
   <script>
-    async function loadDashboard() {
+    let dashboardData = null;
+    let mascotasChart = null;
+
+    async function loadDashboardData() {
       try {
-        const res = await fetch('/api/dashboard');
-        const data = await res.json();
-
-        document.getElementById('kpiClientes').textContent = data.totalClientes;
-        document.getElementById('kpiMascotas').textContent = data.totalMascotas;
-        document.getElementById('kpiCitas').textContent = data.citasHoy;
-        document.getElementById('kpiIngresos').textContent = `S/ ${data.ingresosHoy}`;
-
-        const tbodyCitas = document.getElementById('tbodyCitas');
-        tbodyCitas.innerHTML = '';
-        data.proximasCitas.forEach(c => {
-          const tr = document.createElement('tr');
-          tr.innerHTML = `
-            <td>${c.fechaCita?.replace('T',' ') || '-'}</td>
-            <td>${c.cliente}</td>
-            <td>${c.mascota}</td>
-            <td>${c.servicio}</td>
-            <td><span class="badge bg-secondary">${c.estado}</span></td>`;
-          tbodyCitas.appendChild(tr);
-        });
-
-        const tbodyVentas = document.getElementById('tbodyVentas');
-        tbodyVentas.innerHTML = '';
-        data.ultimasVentas.forEach((v,i) => {
-          const tr = document.createElement('tr');
-          tr.innerHTML = `
-            <td>${i+1}</td>
-            <td>${v.cliente}</td>
-            <td>${v.fecha?.replace('T',' ') || '-'}</td>
-            <td><strong>S/ ${v.total}</strong></td>`;
-          tbodyVentas.appendChild(tr);
-        });
-
-        initCharts(data.ventasSemanales, data.distribucionMascotas);
-
-      } catch (e) {
-        console.error("Error cargando dashboard:", e);
+        const response = await fetch('/api/dashboard');
+        dashboardData = await response.json();
+        console.log('Datos del dashboard cargados:', dashboardData); // Para debugging
+        updateDashboardUI();
+        updateIngresosChart();
+      } catch (error) {
+        console.error('Error cargando datos del dashboard:', error);
+        dashboardData = {
+          totalClientes: 0,
+          totalMascotas: 0,
+          citasHoy: 0,
+          ingresosHoy: 0
+        };
+        updateDashboardUI();
       }
     }
 
-    function initCharts(ventasSemanales, distribucionMascotas) {
-      const ctx1 = document.getElementById('ventasChart');
-      new Chart(ctx1, {
-        type: 'line',
-        data: {
-          labels: ventasSemanales.map(v => v.semana),
-          datasets: [{
-            label: 'Ventas S/',
-            data: ventasSemanales.map(v => v.total),
-            tension:.35,
-            borderColor: '#0066cc',
-            fill: false
-          }]
-        }
-      });
+    function updateDashboardUI() {
+      if (!dashboardData) return;
 
-      const ctx2 = document.getElementById('especiesChart');
-      new Chart(ctx2, {
-        type: 'doughnut',
-        data: {
-          labels: distribucionMascotas.map(m => m.especie),
-          datasets: [{
-            data: distribucionMascotas.map(m => m.cantidad),
-            backgroundColor: ['#00bcd4','#ff9800','#8bc34a']
-          }]
-        },
-        options: { plugins: { legend: { position: 'bottom' } } }
+      const totalClientes = document.querySelector('.stats-card:nth-child(1) .stats-number');
+      const totalMascotas = document.querySelector('.stats-card:nth-child(2) .stats-number');
+      const citasHoy = document.querySelector('.stats-card:nth-child(3) .stats-number');
+      const ingresosHoy = document.querySelector('.stats-card:nth-child(4) .stats-number');
+
+      if (totalClientes) totalClientes.textContent = dashboardData.totalClientes || 0;
+      if (totalMascotas) totalMascotas.textContent = dashboardData.totalMascotas || 0;
+      if (citasHoy) citasHoy.textContent = dashboardData.citasHoy || 0;
+      if (ingresosHoy) {
+        const ingresos = dashboardData.ingresosHoy || 0;
+        ingresosHoy.textContent = formatCurrency(ingresos);
+        console.log('Ingresos del día:', ingresos); // Para debugging
+      }
+
+      updateProximasCitas();
+      
+      updateVentasRecientes();
+      
+      updateMascotasChart();
+    }
+
+    function formatCurrency(amount) {
+      return new Intl.NumberFormat('es-PE', {
+        style: 'currency',
+        currency: 'PEN',
+        minimumFractionDigits: 2
+      }).format(amount);
+    }
+
+    function updateProximasCitas() {
+      const citasContainer = document.querySelector('.col-xl-6:first-child .list-group-flush');
+      if (!citasContainer || !dashboardData.proximasCitas) return;
+
+      if (dashboardData.proximasCitas.length === 0) {
+        citasContainer.innerHTML = '<div class="activity-item text-center py-3"><p class="text-muted">No hay citas programadas</p></div>';
+        return;
+      }
+
+      citasContainer.innerHTML = dashboardData.proximasCitas.map(cita => `
+        <div class="activity-item d-flex justify-content-between align-items-start">
+          <div>
+            <h6 class="mb-1"><i class="bi bi-heart me-2 text-danger"></i>${cita.mascota || 'N/A'} - ${cita.servicio || 'N/A'}</h6>
+            <p class="mb-1 text-muted small"><i class="bi bi-clock me-1"></i>${formatDateTime(cita.fechaCita)} - ${cita.cliente || 'N/A'}</p>
+          </div>
+          <span class="badge ${getEstadoBadgeClass(cita.estado)} badge-status">${cita.estado}</span>
+        </div>
+      `).join('');
+    }
+
+    // Actualizar ventas recientes
+    function updateVentasRecientes() {
+      const ventasContainer = document.querySelector('.col-xl-6:last-child .list-group-flush');
+      if (!ventasContainer || !dashboardData.ultimasVentas) return;
+
+      if (dashboardData.ultimasVentas.length === 0) {
+        ventasContainer.innerHTML = '<div class="activity-item text-center py-3"><p class="text-muted">No hay ventas recientes</p></div>';
+        return;
+      }
+
+      ventasContainer.innerHTML = dashboardData.ultimasVentas.map(venta => `
+        <div class="activity-item d-flex justify-content-between align-items-center">
+          <div>
+            <h6 class="mb-1"><i class="bi bi-box me-2 text-primary"></i>Venta #${venta.id}</h6>
+            <small class="text-muted">Cliente: ${venta.cliente || 'N/A'}</small>
+          </div>
+          <div class="text-end">
+            <div class="fw-bold text-success">${formatCurrency(venta.total || 0)}</div>
+            <small class="text-muted">${formatDateTime(venta.fecha)}</small>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    // Obtener clase de badge para estado
+    function getEstadoBadgeClass(estado) {
+      switch(estado?.toLowerCase()) {
+        case 'pendiente': return 'bg-warning';
+        case 'confirmada': return 'bg-primary';
+        case 'completada': return 'bg-success';
+        case 'cancelada': return 'bg-danger';
+        default: return 'bg-secondary';
+      }
+    }
+
+    // Formatear fecha y hora
+    function formatDateTime(dateTime) {
+      if (!dateTime) return 'N/A';
+      const date = new Date(dateTime);
+      return date.toLocaleDateString('es-PE', {
+        hour: '2-digit',
+        minute: '2-digit',
+        day: '2-digit',
+        month: '2-digit'
       });
     }
 
-    document.addEventListener('DOMContentLoaded', loadDashboard);
+    // Actualizar gráfico de distribución de mascotas
+    function updateMascotasChart() {
+      if (!dashboardData.distribucionMascotas) return;
+      
+      const distribucion = dashboardData.distribucionMascotas;
+      console.log('Distribución de mascotas recibida:', distribucion); // Para debugging
+      
+      // Procesar datos de distribución
+      const labels = [];
+      const data = [];
+      const colors = ['#667eea', '#f093fb', '#4facfe', '#43e97b', '#f5576c'];
+      
+      distribucion.forEach((item, index) => {
+        if (item && item.especie && item.cantidad !== undefined) {
+          labels.push(item.especie);
+          data.push(item.cantidad);
+        }
+      });
+      
+      console.log('Datos procesados:', { labels, data }); // Para debugging
+      
+      // Si no hay datos, usar valores por defecto
+      if (labels.length === 0) {
+        labels.push('Perros', 'Gatos', 'Otros');
+        data.push(0, 0, 0);
+      }
+      
+      // Crear o actualizar el gráfico
+      const ctx = document.getElementById('mascotasChart');
+      if (ctx) {
+        // Destruir gráfico existente si existe
+        if (mascotasChart) {
+          mascotasChart.destroy();
+        }
+        
+        mascotasChart = new Chart(ctx, {
+          type: 'doughnut',
+          data: {
+            labels: labels,
+            datasets: [{
+              data: data,
+              backgroundColor: colors.slice(0, labels.length),
+              borderWidth: 0
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { 
+              legend: { position: 'bottom' },
+              tooltip: {
+                callbacks: {
+                  label: function(context) {
+                    const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                    const percentage = total > 0 ? ((context.parsed / total) * 100).toFixed(1) : 0;
+                    return `${context.label}: ${context.parsed} (${percentage}%)`;
+                  }
+                }
+              }
+            }
+          }
+        });
+      }
+    }
+
+    // Actualizar gráfico de ingresos semanales
+    function updateIngresosChart() {
+      if (!dashboardData.ingresosSemanales) return;
+      
+      const ingresos = dashboardData.ingresosSemanales;
+      console.log('Ingresos semanales recibidos:', ingresos); // Para debugging
+      
+      // Crear array de 7 días con ingresos
+      const ultimos7Dias = [];
+      const ingresosData = [];
+      
+      for (let i = 6; i >= 0; i--) {
+        const fecha = new Date();
+        fecha.setDate(fecha.getDate() - i);
+        ultimos7Dias.push(fecha.toLocaleDateString('es-ES', { weekday: 'short' }));
+        
+        // Buscar ingresos para esta fecha
+        const fechaStr = fecha.toISOString().split('T')[0];
+        const ingresoDia = ingresos.find(ing => {
+          // Manejar diferentes formatos de fecha
+          const ingresoFecha = new Date(ing.fecha).toISOString().split('T')[0];
+          return ingresoFecha === fechaStr;
+        });
+        ingresosData.push(ingresoDia ? ingresoDia.total : 0);
+      }
+      
+      console.log('Datos del gráfico:', { ultimos7Dias, ingresosData }); // Para debugging
+      
+      // Actualizar el gráfico si ya existe
+      const chartCanvas = document.getElementById('ingresosChart');
+      if (chartCanvas && window.ingresosChart) {
+        window.ingresosChart.data.labels = ultimos7Dias;
+        window.ingresosChart.data.datasets[0].data = ingresosData;
+        window.ingresosChart.update();
+      }
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+      // Cargar datos del dashboard
+      loadDashboardData();
+
+      // Ingresos Chart
+      window.ingresosChart = new Chart(document.getElementById('ingresosChart'), {
+        type: 'line',
+        data: {
+          labels: ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'],
+          datasets: [{
+            label: 'Ingresos (S/)',
+            data: [1200, 1900, 3000, 5000, 2000, 3000, 4500],
+            borderColor: '#667eea',
+            backgroundColor: 'rgba(102, 126, 234, 0.1)',
+            borderWidth: 3,
+            fill: true,
+            tension: 0.4
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { display: false } },
+          interaction: { intersect: false, mode: 'index' },
+          scales: {
+            y: { beginAtZero: true, grid: { color: 'rgba(0,0,0,0.1)' } },
+            x: { grid: { display: false } }
+          }
+        }
+      });
+
+      // Mascotas Chart - solo si no hay datos de la API
+      if (!dashboardData || !dashboardData.distribucionMascotas) {
+        mascotasChart = new Chart(document.getElementById('mascotasChart'), {
+          type: 'doughnut',
+          data: {
+            labels: ['Perros', 'Gatos', 'Otros'],
+            datasets: [{
+              data: [65, 25, 10],
+              backgroundColor: ['#667eea', '#f093fb', '#4facfe'],
+              borderWidth: 0
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { position: 'bottom' } }
+          }
+        });
+      } else {
+        // Si hay datos de la API, actualizar el gráfico
+        updateMascotasChart();
+      }
+    });
   </script>
 </body>
 </html>

@@ -11,9 +11,9 @@ public class DashboardDTO {
 
     private List<CitaDTO> proximasCitas;
     private List<VentaDTO> ultimasVentas;
-
-    private List<VentasSemanaDTO> ventasSemanales;
+    private List<VentaDTO> ventasSemanales;
     private List<MascotaDistribucionDTO> distribucionMascotas;
+    private List<IngresosSemanalesDTO> ingresosSemanales;
 
     public long getTotalClientes() { return totalClientes; }
     public void setTotalClientes(long totalClientes) { this.totalClientes = totalClientes; }
@@ -33,10 +33,13 @@ public class DashboardDTO {
     public List<VentaDTO> getUltimasVentas() { return ultimasVentas; }
     public void setUltimasVentas(List<VentaDTO> ultimasVentas) { this.ultimasVentas = ultimasVentas; }
 
-    public List<VentasSemanaDTO> getVentasSemanales() { return ventasSemanales; }
-    public void setVentasSemanales(List<VentasSemanaDTO> ventasSemanales) { this.ventasSemanales = ventasSemanales; }
+    public List<VentaDTO> getVentasSemanales() { return ventasSemanales; }
+    public void setVentasSemanales(List<VentaDTO> ventasSemanales) { this.ventasSemanales = ventasSemanales; }
 
     public List<MascotaDistribucionDTO> getDistribucionMascotas() { return distribucionMascotas; }
     public void setDistribucionMascotas(List<MascotaDistribucionDTO> distribucionMascotas) { this.distribucionMascotas = distribucionMascotas; }
+
+    public List<IngresosSemanalesDTO> getIngresosSemanales() { return ingresosSemanales; }
+    public void setIngresosSemanales(List<IngresosSemanalesDTO> ingresosSemanales) { this.ingresosSemanales = ingresosSemanales; }
 
 }

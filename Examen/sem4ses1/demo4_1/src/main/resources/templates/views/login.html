@@ -64,10 +64,10 @@
     <div class="col-lg-8 col-xl-7">
       <div class="card login-card">
         <div class="row g-0">
-          <!-- Imagen lateral -->
+          
           <div class="col-md-5 d-none d-md-block login-left"></div>
 
-          <!-- Formulario -->
+          
           <div class="col-md-7 d-flex align-items-center">
             <div class="login-right w-100">
               <div class="text-center mb-4">
@@ -76,21 +76,27 @@
                 <p class="text-muted small">Bienvenido, inicia sesión para continuar</p>
               </div>
 
-              <!-- Mostrar error si existe -->
-              <div th:if="${error}" class="alert alert-danger py-2" role="alert">
+              
+              <div th:if="${param.error}" class="alert alert-danger py-2" role="alert">
                 <i class="bi bi-exclamation-circle"></i>
-                <span th:text="${error}"></span>
+                <span>Correo o contraseña incorrectos</span>
               </div>
 
-              <!-- Formulario login -->
-              <form th:action="@{/login}" th:object="${loginDTO}" method="post">
+              
+              <div th:if="${param.logout}" class="alert alert-success py-2" role="alert">
+                <i class="bi bi-check-circle"></i>
+                <span>Sesión cerrada correctamente</span>
+              </div>
+
+              
+              <form th:action="@{/login}" method="post">
                 <div class="mb-3">
-                  <label for="correo" class="form-label">Correo</label>
-                  <input type="email" id="correo" th:field="*{correo}" class="form-control" placeholder="ejemplo@correo.com" required>
+                  <label for="username" class="form-label">Correo</label>
+                  <input type="email" id="username" name="username" class="form-control" placeholder="ejemplo@correo.com" required>
                 </div>
                 <div class="mb-3">
                   <label for="password" class="form-label">Contraseña</label>
-                  <input type="password" id="password" th:field="*{password}" class="form-control" placeholder="••••••••" required>
+                  <input type="password" id="password" name="password" class="form-control" placeholder="••••••••" required>
                 </div>
                 <div class="d-grid mb-3">
                   <button type="submit" class="btn btn-login">Iniciar Sesión</button>
