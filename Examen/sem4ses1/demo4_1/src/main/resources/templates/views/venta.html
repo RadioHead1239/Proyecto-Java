@@ -548,7 +548,7 @@
             </div>
           </td>
           <td>
-            <span class="badge bg-info">${venta.productos || 'Sin productos'}</span>
+            <span class="badge bg-info">${venta.detalles ? venta.detalles.length + ' productos' : 'Sin productos'}</span>
           </td>
           <td><span class="fw-bold text-success">S/ ${venta.total}</span></td>
           <td>
@@ -564,11 +564,11 @@
               <button class="btn btn-outline-primary" onclick="editarVenta(${venta.id})" title="Editar">
                 <i class="bi bi-pencil"></i>
               </button>
-              <button class="btn btn-outline-info" onclick="verDetalles(${venta.id})" title="Ver detalles">
-                <i class="bi bi-eye"></i>
+              <button class="btn btn-outline-info" onclick="verDetalles(${venta.id})" title="Ver PDF">
+                <i class="bi bi-file-pdf"></i>
               </button>
               <button class="btn btn-outline-success" onclick="generarComprobante(${venta.id})" title="Generar Comprobante">
-                <i class="bi bi-file-pdf"></i>
+                <i class="bi bi-receipt"></i>
               </button>
               <button class="btn btn-outline-danger" onclick="eliminarVenta(${venta.id})" title="Eliminar">
                 <i class="bi bi-trash"></i>
@@ -616,7 +616,12 @@
         idCliente: parseInt(formData.get('idCliente')),
         estado: formData.get('estado'),
         total: productosVenta.reduce((sum, producto) => sum + producto.subtotal, 0),
-        productos: productosVenta
+        detalles: productosVenta.map(producto => ({
+          idProducto: producto.id,
+          cantidad: producto.cantidad,
+          precioUnitario: producto.precio,
+          subtotal: producto.subtotal
+        }))
       };
       
       try {
@@ -648,34 +653,424 @@
       }
     }
 
-    function editarVenta(id) {
-      const venta = ventas.find(v => v.id === id);
-      if (!venta) return;
-      
-      ventaEditando = id;
-      document.getElementById('modalTitle').textContent = 'Editar Venta';
-      
-      document.getElementById('idCliente').value = venta.idCliente;
-      document.getElementById('estado').value = venta.estado;
-      
-      new bootstrap.Modal(document.getElementById('ventaModal')).show();
+    async function editarVenta(id) {
+      try {
+        const response = await fetch(`/api/ventas/${id}`);
+        if (!response.ok) throw new Error('Error al cargar venta');
+        
+        const venta = await response.json();
+        if (!venta) return;
+        
+        ventaEditando = id;
+        document.getElementById('modalTitle').textContent = 'Editar Venta';
+        
+        document.getElementById('idCliente').value = venta.idCliente;
+        document.getElementById('estado').value = venta.estado;
+        
+        // Cargar productos de la venta
+        productosVenta = [];
+        if (venta.detalles && venta.detalles.length > 0) {
+          venta.detalles.forEach(detalle => {
+            productosVenta.push({
+              id: detalle.idProducto,
+              nombre: detalle.producto,
+              precio: parseFloat(detalle.precioUnitario),
+              cantidad: detalle.cantidad,
+              subtotal: parseFloat(detalle.subtotal)
+            });
+          });
+        }
+        
+        renderProductosList();
+        updateTotal();
+        
+        new bootstrap.Modal(document.getElementById('ventaModal')).show();
+      } catch (error) {
+        console.error('Error:', error);
+        showError('Error al cargar la venta');
+      }
     }
 
-    function verDetalles(id) {
+    async function verDetalles(id) {
+      try {
+        console.log('verDetalles llamado con ID:', id);
       const venta = ventas.find(v => v.id === id);
-      if (!venta) return;
-      
-      showInfo(`
-        <strong>Venta #${venta.id}</strong><br>
-        <strong>Cliente:</strong> ${venta.cliente}<br>
-        <strong>Total:</strong> S/ ${venta.total}<br>
-        <strong>Estado:</strong> ${venta.estado}<br>
-        <strong>Fecha:</strong> ${new Date(venta.fecha).toLocaleString()}<br>
-        <strong>Usuario:</strong> ${venta.usuario || 'No asignado'}
-      `);
+        if (!venta) {
+          showError('Venta no encontrada');
+          return;
+        }
+
+        // Obtener detalles completos de la venta
+        const response = await fetch(`/api/ventas/${id}`);
+        if (!response.ok) throw new Error('Error al cargar detalles de la venta');
+        
+        const ventaCompleta = await response.json();
+        console.log('Venta completa cargada:', ventaCompleta);
+        
+        // Generar PDF en formato A4 profesional
+        console.log('Generando factura A4...');
+        generarPDFVentaA4(ventaCompleta);
+        
+      } catch (error) {
+        console.error('Error:', error);
+        showError('Error al cargar los detalles de la venta');
+      }
     }
 
-    // Función para generar comprobante de venta
+    // Función para generar PDF de venta en formato A4 profesional
+    async function generarPDFVentaA4(venta) {
+      try {
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF();
+
+        // Configuración de colores
+        const primaryColor = [25, 25, 112]; // Azul oscuro
+        const secondaryColor = [70, 130, 180]; // Azul acero
+        const textColor = [51, 51, 51];
+        const lightGray = [245, 245, 245];
+        const darkGray = [64, 64, 64];
+
+        // Encabezado con logo y título
+        doc.setFillColor(...primaryColor);
+        doc.rect(0, 0, 210, 25, 'F');
+
+        // Logo (cruz médica)
+        doc.setFillColor(255, 255, 255);
+        doc.rect(15, 5, 8, 8, 'F');
+        doc.setFillColor(...primaryColor);
+        doc.rect(17, 7, 4, 4, 'F');
+        doc.setFillColor(255, 255, 255);
+        doc.rect(18, 8, 2, 2, 'F');
+
+        // Título FACTURA
+        doc.setTextColor(255, 255, 255);
+        doc.setFontSize(24);
+        doc.setFont('helvetica', 'bold');
+        doc.text('COMPROBANTE DE PAGO', 30, 15);
+
+        // Información de la empresa
+        doc.setTextColor(...textColor);
+        doc.setFontSize(10);
+        doc.setFont('helvetica', 'normal');
+        doc.text('VetCare - Veterinaria y Clínica Animal', 20, 35);
+        doc.text('RUC: 20123456789', 20, 40);
+        doc.text('Av. Javier Prado Este 123, San Isidro, Lima', 20, 45);
+        doc.text('Tel: (01) 234-5678 | Email: info@vetcare.com', 20, 50);
+
+        // Información del comprobante (centrado)
+        const infoX = 105; // centro aproximado de la hoja A4
+        doc.setFontSize(12);
+        doc.setFont('helvetica', 'bold');
+        doc.text(`N° Comprobante: ${venta.id}`, infoX, 35);
+
+        const fecha = new Date(venta.fecha).toLocaleDateString('es-ES', {
+          year: 'numeric',
+          month: 'long',
+          day: 'numeric'
+        });
+        doc.text(`Fecha: ${fecha}`, infoX, 40);
+        doc.text(`Cliente: ${venta.cliente || 'Público en General'}`, infoX, 45);
+        doc.text(`Estado: ${venta.estado}`, infoX, 50);
+
+        // Línea separadora
+        doc.setDrawColor(...primaryColor);
+        doc.setLineWidth(1);
+        doc.line(20, 55, 190, 55);
+
+        // Tabla de productos
+        // Título centrado de la sección
+        doc.setFontSize(14);
+        doc.setFont('helvetica', 'bold');
+        doc.setTextColor(...textColor);
+        doc.text('DETALLE DE PRODUCTOS Y SERVICIOS', 105, 65, { align: 'center' });
+
+        const tableStartX = 20;
+        const tableWidth = 170;
+        doc.setFillColor(...lightGray);
+        doc.rect(tableStartX, 70, tableWidth, 10, 'F');
+
+        // Columnas
+        const conceptoX = 10;
+        const cantidadX = 100;
+        const precioX = 120; 
+        const totalX = 150;
+        doc.setFontSize(10);
+        doc.setFont('helvetica', 'bold');
+        doc.setTextColor(...darkGray);
+        doc.text('CONCEPTO', conceptoX, 77);
+        doc.text('CANT.', cantidadX, 77);
+        doc.text('PRECIO UNIT.', precioX, 77);
+        doc.text('TOTAL', totalX, 77);
+
+
+        // Detalles de la tabla
+        let yPosition = 85;
+        let subtotal = 0;
+        const iva = 0.18;
+
+        console.log('Venta completa recibida:', venta);
+        console.log('Detalles de la venta:', venta.detalles);
+
+        if (venta.detalles && venta.detalles.length > 0) {
+          venta.detalles.forEach((detalle, index) => {
+            console.log('Procesando detalle:', detalle);
+            doc.setFont('helvetica', 'normal');
+            doc.setTextColor(...textColor);
+
+            const nombreProducto = detalle.producto || detalle.nombreProducto || 'Producto';
+            const cantidad = detalle.cantidad;
+            const precioUnitario = parseFloat(detalle.precioUnitario || detalle.precio);
+            const total = parseFloat(detalle.subtotal || detalle.total);
+
+            doc.text(nombreProducto, conceptoX, yPosition);
+            doc.text(cantidad.toString(), cantidadX, yPosition);
+            doc.text(`S/ ${precioUnitario.toFixed(2)}`, precioX, yPosition);
+            doc.text(`S/ ${total.toFixed(2)}`, totalX, yPosition);
+
+
+            subtotal += total;
+            yPosition += 6;
+
+            if (index < venta.detalles.length - 1) {
+              doc.setDrawColor(200, 200, 200);
+              doc.line(tableStartX, yPosition - 2, tableStartX + tableWidth, yPosition - 2);
+            }
+          });
+        } else {
+          console.log('No hay detalles en la venta');
+          doc.setFont('helvetica', 'italic');
+          doc.text('No hay productos registrados', conceptoX, yPosition);
+          yPosition += 6;
+        }
+
+        // Línea final
+        doc.setDrawColor(...primaryColor);
+        doc.setLineWidth(0.5);
+        doc.line(tableStartX, yPosition, tableStartX + tableWidth, yPosition);
+
+        // Totales
+        const subtotalCalculado = subtotal;
+        const ivaCalculado = subtotalCalculado * iva;
+        const totalCalculado = subtotalCalculado + ivaCalculado;
+
+        // Totales (centrado visual aproximado)
+        const totalsX = 105;
+
+        yPosition += 10;
+        doc.setFontSize(10);
+        doc.setFont('helvetica', 'normal');
+        doc.text('Subtotal:', totalsX, yPosition);
+        doc.text(`S/ ${subtotalCalculado.toFixed(2)}`, totalsX + 40, yPosition);
+
+        yPosition += 6;
+        doc.text('IVA (18%):', totalsX, yPosition);
+        doc.text(`S/ ${ivaCalculado.toFixed(2)}`, totalsX + 40, yPosition);
+
+        yPosition += 8;
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(12);
+        doc.text('TOTAL:', totalsX, yPosition);
+        doc.text(`S/ ${totalCalculado.toFixed(2)}`, totalsX + 40, yPosition);
+
+        // Pie de página
+        yPosition += 20;
+        doc.setFillColor(...lightGray);
+        doc.rect(20, yPosition, 100, 15, 'F');
+
+        doc.setFontSize(10);
+        doc.setFont('helvetica', 'bold');
+        doc.setTextColor(...primaryColor);
+        doc.text('TOTAL COMPROBANTE', 25, yPosition + 8);
+
+        doc.setFontSize(8);
+        doc.setFont('helvetica', 'normal');
+        doc.setTextColor(...textColor);
+        doc.text('Este comprobante no tiene validez fiscal ante SUNAT', 25, yPosition + 12);
+
+        // Información adicional
+        yPosition += 30;
+        doc.setFontSize(8);
+        doc.setFont('helvetica', 'normal');
+        doc.setTextColor(100, 100, 100);
+        doc.text('Gracias por su compra', 20, yPosition);
+        doc.text('VetCare - Cuidando a tus mascotas', 20, yPosition + 5);
+
+        // Generar PDF como blob para envío por email
+        const pdfBlob = doc.output('blob');
+        const nombreArchivo = `Comprobante_${venta.id}_${new Date().toISOString().split('T')[0]}.pdf`;
+        
+        // Mostrar opciones: Descargar o Enviar por Email
+        const { value: accion } = await Swal.fire({
+          title: 'Comprobante Generado',
+          text: '¿Qué deseas hacer con el comprobante?',
+          icon: 'success',
+          showCancelButton: true,
+          confirmButtonText: 'Enviar por Email',
+          cancelButtonText: 'Solo Descargar',
+          showDenyButton: true,
+          denyButtonText: 'Cancelar',
+          denyButtonColor: '#6c757d'
+        });
+
+        if (accion === undefined) return; // Usuario canceló
+
+        if (accion) {
+          // Enviar por email
+          await enviarComprobantePorEmail(venta, pdfBlob, nombreArchivo);
+        } else {
+          // Solo descargar
+          doc.save(nombreArchivo);
+          showSuccess('Comprobante de pago generado exitosamente');
+        }
+
+      } catch (error) {
+        console.error('Error al generar PDF:', error);
+        showError('Error al generar el comprobante');
+      }
+    }
+
+    // Función para enviar comprobante por email
+    async function enviarComprobantePorEmail(venta, pdfBlob, nombreArchivo) {
+      try {
+        // Solicitar email del destinatario
+        const { value: emailDestino } = await Swal.fire({
+          title: 'Enviar Comprobante por Email',
+          input: 'email',
+          inputLabel: 'Email del destinatario',
+          inputValue: venta.cliente ? `${venta.cliente.toLowerCase().replace(/\s+/g, '')}@gmail.com` : '',
+          inputPlaceholder: 'ejemplo@email.com',
+          showCancelButton: true,
+          confirmButtonText: 'Enviar',
+          cancelButtonText: 'Cancelar',
+          inputValidator: (value) => {
+            if (!value) {
+              return 'Debes ingresar un email válido';
+            }
+            if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
+              return 'Debes ingresar un email válido';
+            }
+          }
+        });
+
+        if (!emailDestino) return;
+
+        // Mostrar loading
+        Swal.fire({
+          title: 'Enviando...',
+          text: 'Preparando el envío del comprobante',
+          allowOutsideClick: false,
+          showConfirmButton: false,
+          didOpen: () => {
+            Swal.showLoading();
+          }
+        });
+
+        // Convertir PDF a base64
+        const reader = new FileReader();
+        reader.onload = async function() {
+          const base64Pdf = reader.result.split(',')[1];
+          
+          try {
+            // Enviar email usando backend
+            await enviarEmailGmail(emailDestino, venta, base64Pdf, nombreArchivo);
+            
+            Swal.fire({
+              title: '¡Enviado!',
+              text: `Comprobante enviado exitosamente a ${emailDestino}`,
+              icon: 'success',
+              confirmButtonText: 'OK'
+            });
+          } catch (error) {
+            console.error('Error al enviar email:', error);
+            console.error('Error details:', error.message);
+            
+            let errorMessage = 'No se pudo enviar el email. Intenta nuevamente.';
+            if (error.message) {
+              errorMessage = `Error: ${error.message}`;
+            }
+            
+            Swal.fire({
+              title: 'Error al Enviar Email',
+              html: `
+                <div style="text-align: left;">
+                  <p><strong>Error:</strong> ${errorMessage}</p>
+                  <p><strong>Posibles causas:</strong></p>
+                  <ul style="text-align: left; margin: 10px 0;">
+                    <li>Verificar conexión a internet</li>
+                    <li>Credenciales de Gmail incorrectas</li>
+                    <li>Email de destino inválido</li>
+                    <li>Problema con el servidor SMTP</li>
+                  </ul>
+                </div>
+              `,
+              icon: 'error',
+              confirmButtonText: 'OK',
+              width: 500
+            });
+          }
+        };
+        
+        reader.readAsDataURL(pdfBlob);
+        
+      } catch (error) {
+        console.error('Error:', error);
+        showError('Error al preparar el envío del email');
+      }
+    }
+
+    // Función para enviar email usando backend
+    async function enviarEmailGmail(emailDestino, venta, base64Pdf, nombreArchivo) {
+      const fecha = new Date(venta.fecha).toLocaleDateString('es-ES', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+      });
+
+      const emailData = {
+        to: emailDestino,
+        subject: `Comprobante de Pago #${venta.id} - VetCare`,
+        venta: {
+          id: venta.id,
+          fecha: fecha,
+          cliente: venta.cliente || 'Público en General',
+          estado: venta.estado,
+          total: venta.total
+        },
+        pdfBase64: base64Pdf,
+        pdfName: nombreArchivo
+      };
+
+      // Enviar usando endpoint del backend
+      const response = await fetch('/api/ventas/enviar-email', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(emailData)
+      });
+
+      if (!response.ok) {
+        let errorMessage = 'Error al enviar email';
+        try {
+          const errorData = await response.json();
+          errorMessage = errorData.message || errorMessage;
+        } catch (e) {
+          // Si no es JSON, leer como texto
+          const errorText = await response.text();
+          errorMessage = errorText || errorMessage;
+        }
+        throw new Error(errorMessage);
+      }
+
+      // Manejar respuesta exitosa
+      const result = await response.json();
+      if (!result.success) {
+        throw new Error(result.message || 'Error desconocido');
+      }
+      return result;
+    }
+
+    // Función para generar comprobante de venta (mantener para compatibilidad)
     async function generarComprobante(id) {
       try {
         const venta = ventas.find(v => v.id === id);
@@ -684,13 +1079,14 @@
           return;
         }
 
-        // Obtener detalles de la venta (esto dependería de tu API)
-        const detalles = venta.detalles || [];
+        // Obtener detalles completos de la venta
+        const response = await fetch(`/api/ventas/${id}`);
+        if (!response.ok) throw new Error('Error al cargar detalles de la venta');
         
-        // Generar el PDF
-        VetCareUtils.generateSaleReceipt(venta, detalles);
+        const ventaCompleta = await response.json();
         
-        showSuccess('Comprobante generado exitosamente');
+        // Generar PDF en formato A4
+        generarPDFVentaA4(ventaCompleta);
         
       } catch (error) {
         console.error('Error al generar comprobante:', error);

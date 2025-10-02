@@ -41,6 +41,16 @@ public class MascotasController {
         }
     }
 
+    @GetMapping("/api/mascotas/cliente/{clienteId}")
+    public ResponseEntity<List<MascotaDTO>> getMascotasByCliente(@PathVariable Long clienteId) {
+        try {
+            List<MascotaDTO> mascotas = mascotaService.findByClienteId(clienteId);
+            return ResponseEntity.ok(mascotas);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
     @GetMapping("/api/mascotas/{id}")
     public ResponseEntity<MascotaDTO> getMascotaById(@PathVariable Long id) {
         try {

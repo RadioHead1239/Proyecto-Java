@@ -217,6 +217,33 @@
     </section>
 
     <section class="container-fluid py-4">
+      <!-- Filtro de fecha -->
+      <div class="row mb-4">
+        <div class="col-12">
+          <div class="card">
+            <div class="card-body">
+              <div class="row align-items-center">
+                <div class="col-md-6">
+                  <h5 class="card-title mb-0"><i class="bi bi-calendar3 me-2"></i>Filtrar por Fecha</h5>
+                  <p class="text-muted small mb-0">Selecciona una fecha para ver las ventas de ese día</p>
+                </div>
+                <div class="col-md-6">
+                  <div class="d-flex gap-2">
+                    <input type="date" id="fechaFiltro" class="form-control" value="">
+                    <button type="button" id="btnFiltrar" class="btn btn-primary">
+                      <i class="bi bi-search me-1"></i>Filtrar
+                    </button>
+                    <button type="button" id="btnLimpiar" class="btn btn-outline-secondary">
+                      <i class="bi bi-x-circle me-1"></i>Limpiar
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <div class="row g-4 mb-4">
         <div class="col-xl-3 col-md-6">
           <div class="stats-card">
@@ -225,8 +252,8 @@
                 <i class="bi bi-people" aria-hidden="true"></i>
               </div>
               <div class="ms-3">
-                <div class="stats-number" th:text="${dashboard.totalClientes}">0</div>
-                <div class="stats-label">Clientes Registrados</div>
+                <div class="stats-number" id="totalClientes" th:text="${dashboard.totalClientes}">0</div>
+                <div class="stats-label" id="labelClientes">Clientes Registrados</div>
               </div>
             </div>
           </div>
@@ -238,8 +265,8 @@
                 <i class="bi bi-heart" aria-hidden="true"></i>
               </div>
               <div class="ms-3">
-                <div class="stats-number" th:text="${dashboard.totalMascotas}">0</div>
-                <div class="stats-label">Mascotas Atendidas</div>
+                <div class="stats-number" id="totalMascotas" th:text="${dashboard.totalMascotas}">0</div>
+                <div class="stats-label" id="labelMascotas">Mascotas Atendidas</div>
               </div>
             </div>
           </div>
@@ -251,8 +278,8 @@
                 <i class="bi bi-calendar-check" aria-hidden="true"></i>
               </div>
               <div class="ms-3">
-                <div class="stats-number" th:text="${dashboard.citasHoy}">0</div>
-                <div class="stats-label">Citas Hoy</div>
+                <div class="stats-number" id="citasHoy" th:text="${dashboard.citasHoy}">0</div>
+                <div class="stats-label" id="labelCitas">Citas Hoy</div>
               </div>
             </div>
           </div>
@@ -264,9 +291,24 @@
                 <i class="bi bi-currency-dollar" aria-hidden="true"></i>
               </div>
               <div class="ms-3">
-                <div class="stats-number" th:text="${#numbers.formatDecimal(dashboard.ingresosHoy, 1, 2)}">S/ 0.00</div>
-                <div class="stats-label">Ingresos del Día</div>
+                <div class="stats-number" id="ingresosHoy" th:text="${#numbers.formatDecimal(dashboard.ingresosHoy, 1, 2)}">S/ 0.00</div>
+                <div class="stats-label" id="labelIngresos">Ingresos del Día</div>
               </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Ventas filtradas por fecha -->
+      <div class="row g-4 mb-4" id="ventasFiltradas" style="display: none;">
+        <div class="col-12">
+          <div class="chart-container">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+              <h5 class="chart-title mb-0"><i class="bi bi-receipt me-2"></i>Ventas del Día Seleccionado</h5>
+              <span class="badge bg-primary" id="fechaSeleccionada"></span>
+            </div>
+            <div id="ventasDelDia">
+              <!-- Las ventas se cargarán aquí dinámicamente -->
             </div>
           </div>
         </div>
@@ -295,45 +337,18 @@
       </div>
 
       <div class="row g-4 mt-4">
-        <div class="col-xl-6">
+        <div class="col-12">
           <div class="chart-container">
             <div class="d-flex justify-content-between align-items-center mb-3">
-              <h5 class="chart-title mb-0"><i class="bi bi-calendar-event me-2"></i>Próximas Citas</h5>
+              <h5 class="chart-title mb-0"><i class="bi bi-calendar-event me-2"></i>Citas del Día</h5>
               <a href="/cita" class="btn btn-outline-primary btn-sm"><i class="bi bi-plus"></i> Nueva Cita</a>
             </div>
-            <div class="list-group list-group-flush">
-              <div class="activity-item d-flex justify-content-between align-items-start">
-                <div>
-                  <h6 class="mb-1"><i class="bi bi-heart me-2 text-danger"></i>Max - Baño y Corte</h6>
-                  <p class="mb-1 text-muted small"><i class="bi bi-clock me-1"></i>10:00 AM - María González</p>
-                  <small class="text-muted">Golden Retriever, 3 años</small>
-                </div>
-                <span class="badge bg-primary badge-status">Confirmada</span>
-              </div>
+            <div class="list-group list-group-flush" id="citasDelDia">
+              <!-- Las citas se cargarán aquí dinámicamente -->
             </div>
           </div>
         </div>
 
-        <div class="col-xl-6">
-          <div class="chart-container">
-            <div class="d-flex justify-content-between align-items-center mb-3">
-              <h5 class="chart-title mb-0"><i class="bi bi-cart-check me-2"></i>Ventas Recientes</h5>
-              <a href="/venta" class="btn btn-outline-primary btn-sm"><i class="bi bi-plus"></i> Nueva Venta</a>
-            </div>
-            <div class="list-group list-group-flush">
-              <div class="activity-item d-flex justify-content-between align-items-center">
-                <div>
-                  <h6 class="mb-1"><i class="bi bi-box me-2 text-primary"></i>Shampoo Antialérgico</h6>
-                  <small class="text-muted">Cliente: María González</small>
-                </div>
-                <div class="text-end">
-                  <div class="fw-bold text-success">S/ 45.00</div>
-                  <small class="text-muted">Hace 2 horas</small>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
       </div>
     </section>
   </main>
@@ -380,9 +395,6 @@
         console.log('Ingresos del día:', ingresos); // Para debugging
       }
 
-      updateProximasCitas();
-      
-      updateVentasRecientes();
       
       updateMascotasChart();
     }
@@ -395,49 +407,6 @@
       }).format(amount);
     }
 
-    function updateProximasCitas() {
-      const citasContainer = document.querySelector('.col-xl-6:first-child .list-group-flush');
-      if (!citasContainer || !dashboardData.proximasCitas) return;
-
-      if (dashboardData.proximasCitas.length === 0) {
-        citasContainer.innerHTML = '<div class="activity-item text-center py-3"><p class="text-muted">No hay citas programadas</p></div>';
-        return;
-      }
-
-      citasContainer.innerHTML = dashboardData.proximasCitas.map(cita => `
-        <div class="activity-item d-flex justify-content-between align-items-start">
-          <div>
-            <h6 class="mb-1"><i class="bi bi-heart me-2 text-danger"></i>${cita.mascota || 'N/A'} - ${cita.servicio || 'N/A'}</h6>
-            <p class="mb-1 text-muted small"><i class="bi bi-clock me-1"></i>${formatDateTime(cita.fechaCita)} - ${cita.cliente || 'N/A'}</p>
-          </div>
-          <span class="badge ${getEstadoBadgeClass(cita.estado)} badge-status">${cita.estado}</span>
-        </div>
-      `).join('');
-    }
-
-    // Actualizar ventas recientes
-    function updateVentasRecientes() {
-      const ventasContainer = document.querySelector('.col-xl-6:last-child .list-group-flush');
-      if (!ventasContainer || !dashboardData.ultimasVentas) return;
-
-      if (dashboardData.ultimasVentas.length === 0) {
-        ventasContainer.innerHTML = '<div class="activity-item text-center py-3"><p class="text-muted">No hay ventas recientes</p></div>';
-        return;
-      }
-
-      ventasContainer.innerHTML = dashboardData.ultimasVentas.map(venta => `
-        <div class="activity-item d-flex justify-content-between align-items-center">
-          <div>
-            <h6 class="mb-1"><i class="bi bi-box me-2 text-primary"></i>Venta #${venta.id}</h6>
-            <small class="text-muted">Cliente: ${venta.cliente || 'N/A'}</small>
-          </div>
-          <div class="text-end">
-            <div class="fw-bold text-success">${formatCurrency(venta.total || 0)}</div>
-            <small class="text-muted">${formatDateTime(venta.fecha)}</small>
-          </div>
-        </div>
-      `).join('');
-    }
 
     // Obtener clase de badge para estado
     function getEstadoBadgeClass(estado) {
@@ -564,9 +533,177 @@
       }
     }
 
+    // Función para filtrar por fecha y actualizar estadísticas
+    async function filtrarPorFecha(fecha) {
+      try {
+        console.log('Filtrando por fecha:', fecha); // Debug
+        
+        // Obtener estadísticas del día
+        const responseEstadisticas = await fetch(`/api/dashboard/estadisticas?fecha=${fecha}`);
+        const estadisticas = await responseEstadisticas.json();
+        
+        console.log('Estadísticas recibidas:', estadisticas); // Debug
+        
+        // Actualizar las estadísticas principales
+        actualizarEstadisticas(estadisticas);
+        
+        // Mostrar ventas filtradas
+        mostrarVentasFiltradas(estadisticas.ultimasVentas || [], fecha);
+        
+        // Mostrar citas filtradas
+        mostrarCitasFiltradas(estadisticas.proximasCitas || [], fecha);
+        
+      } catch (error) {
+        console.error('Error filtrando datos:', error);
+        mostrarVentasFiltradas([], fecha);
+        mostrarCitasFiltradas([], fecha);
+      }
+    }
+
+    // Función para mostrar las ventas filtradas
+    function mostrarVentasFiltradas(ventas, fecha) {
+      const ventasContainer = document.getElementById('ventasFiltradas');
+      const ventasDelDia = document.getElementById('ventasDelDia');
+      const fechaSeleccionada = document.getElementById('fechaSeleccionada');
+      
+      if (ventas.length === 0) {
+        ventasDelDia.innerHTML = `
+          <div class="text-center py-4">
+            <i class="bi bi-inbox display-4 text-muted"></i>
+            <p class="text-muted mt-2">No hay ventas registradas para esta fecha</p>
+          </div>
+        `;
+      } else {
+        ventasDelDia.innerHTML = ventas.map(venta => `
+          <div class="activity-item d-flex justify-content-between align-items-center">
+            <div>
+              <h6 class="mb-1"><i class="bi bi-receipt me-2 text-primary"></i>Venta #${venta.id}</h6>
+              <small class="text-muted">Cliente: ${venta.cliente || 'N/A'}</small>
+            </div>
+            <div class="text-end">
+              <div class="fw-bold text-success">${formatCurrency(venta.total || 0)}</div>
+              <small class="text-muted">${formatDateTime(venta.fecha)}</small>
+            </div>
+          </div>
+        `).join('');
+      }
+      
+      fechaSeleccionada.textContent = new Date(fecha).toLocaleDateString('es-PE');
+      ventasContainer.style.display = 'block';
+    }
+
+    // Función para mostrar las citas filtradas
+    function mostrarCitasFiltradas(citas, fecha) {
+      const citasContainer = document.getElementById('citasDelDia');
+      
+      if (citas.length === 0) {
+        citasContainer.innerHTML = `
+          <div class="text-center py-4">
+            <i class="bi bi-calendar-x display-4 text-muted"></i>
+            <p class="text-muted mt-2">No hay citas programadas para esta fecha</p>
+          </div>
+        `;
+      } else {
+        citasContainer.innerHTML = citas.map(cita => `
+          <div class="activity-item d-flex justify-content-between align-items-start">
+            <div>
+              <h6 class="mb-1"><i class="bi bi-heart me-2 text-danger"></i>${cita.mascota || 'N/A'} - ${cita.servicio || 'N/A'}</h6>
+              <p class="mb-1 text-muted small"><i class="bi bi-clock me-1"></i>${formatDateTime(cita.fechaCita)} - ${cita.cliente || 'N/A'}</p>
+              <small class="text-muted">${cita.descripcion || ''}</small>
+            </div>
+            <span class="badge ${getEstadoBadgeClass(cita.estado)} badge-status">${cita.estado}</span>
+          </div>
+        `).join('');
+      }
+    }
+
+    // Función para actualizar las estadísticas principales
+    function actualizarEstadisticas(estadisticas) {
+      console.log('Actualizando estadísticas con:', estadisticas);
+      
+      // Usar IDs únicos para mayor precisión
+      const totalClientes = document.getElementById('totalClientes');
+      const totalMascotas = document.getElementById('totalMascotas');
+      const citasHoy = document.getElementById('citasHoy');
+      const ingresosHoy = document.getElementById('ingresosHoy');
+
+      console.log('Elementos encontrados:', {
+        totalClientes: !!totalClientes,
+        totalMascotas: !!totalMascotas,
+        citasHoy: !!citasHoy,
+        ingresosHoy: !!ingresosHoy
+      });
+
+      if (totalClientes) {
+        totalClientes.textContent = estadisticas.totalClientes || 0;
+        console.log('Clientes actualizados a:', estadisticas.totalClientes);
+      }
+      if (totalMascotas) {
+        totalMascotas.textContent = estadisticas.totalMascotas || 0;
+        console.log('Mascotas actualizadas a:', estadisticas.totalMascotas);
+      }
+      if (citasHoy) {
+        citasHoy.textContent = estadisticas.citasHoy || 0;
+        console.log('Citas actualizadas a:', estadisticas.citasHoy);
+      }
+      if (ingresosHoy) {
+        const ingresos = estadisticas.ingresosHoy || 0;
+        ingresosHoy.textContent = formatCurrency(ingresos);
+        console.log('Ingresos actualizados a:', ingresos, 'formateado como:', formatCurrency(ingresos));
+      }
+
+      // Actualizar etiquetas para indicar que son datos filtrados
+      const labelClientes = document.getElementById('labelClientes');
+      const labelMascotas = document.getElementById('labelMascotas');
+      const labelCitas = document.getElementById('labelCitas');
+      const labelIngresos = document.getElementById('labelIngresos');
+
+      if (labelClientes) labelClientes.textContent = 'Clientes Atendidos';
+      if (labelMascotas) labelMascotas.textContent = 'Mascotas Atendidas';
+      if (labelCitas) labelCitas.textContent = 'Citas del Día';
+      if (labelIngresos) labelIngresos.textContent = 'Ingresos del Día';
+    }
+
+    // Función para limpiar filtro
+    function limpiarFiltro() {
+      document.getElementById('fechaFiltro').value = '';
+      document.getElementById('ventasFiltradas').style.display = 'none';
+      
+      // Restaurar etiquetas originales
+      const labelClientes = document.getElementById('labelClientes');
+      const labelMascotas = document.getElementById('labelMascotas');
+      const labelCitas = document.getElementById('labelCitas');
+      const labelIngresos = document.getElementById('labelIngresos');
+
+      if (labelClientes) labelClientes.textContent = 'Clientes Registrados';
+      if (labelMascotas) labelMascotas.textContent = 'Mascotas Atendidas';
+      if (labelCitas) labelCitas.textContent = 'Citas Hoy';
+      if (labelIngresos) labelIngresos.textContent = 'Ingresos del Día';
+      
+      // Recargar datos del dashboard original
+      loadDashboardData();
+    }
+
     document.addEventListener("DOMContentLoaded", () => {
       // Cargar datos del dashboard
       loadDashboardData();
+
+      // Configurar fecha por defecto (hoy)
+      const hoy = new Date().toISOString().split('T')[0];
+      document.getElementById('fechaFiltro').value = hoy;
+
+      // Event listeners para filtro de fecha
+      document.getElementById('btnFiltrar').addEventListener('click', () => {
+        const fecha = document.getElementById('fechaFiltro').value;
+        if (fecha) {
+          filtrarPorFecha(fecha);
+        }
+      });
+
+      document.getElementById('btnLimpiar').addEventListener('click', limpiarFiltro);
+
+      // Filtrar automáticamente al cargar la página
+      filtrarPorFecha(hoy);
 
       // Ingresos Chart
       window.ingresosChart = new Chart(document.getElementById('ingresosChart'), {

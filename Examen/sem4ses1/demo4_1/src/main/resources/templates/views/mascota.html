@@ -108,7 +108,7 @@
     <div class="topbar d-flex align-items-center justify-content-between">
       <div>
         <h5 class="mb-0"><i class="bi bi-heart me-2"></i>Gestión de Mascotas</h5>
-        <small class="text-muted">Administra la información de las mascotas</small>
+        <small class="text-muted" id="pageDescription">Administra la información de las mascotas</small>
       </div>
       <div class="d-flex gap-2">
         <button class="btn btn-outline-primary btn-sm" onclick="exportarMascotas()">
@@ -282,6 +282,7 @@
       loadMascotas();
       loadClientes();
       setupEventListeners();
+      checkUrlParams();
     });
 
     function setupEventListeners() {
@@ -290,6 +291,36 @@
       document.getElementById('clienteFilter').addEventListener('change', filterMascotas);
       document.getElementById('edadMin').addEventListener('input', filterMascotas);
       document.getElementById('formMascota').addEventListener('submit', handleSubmitMascota);
+    }
+
+    function checkUrlParams() {
+      const urlParams = new URLSearchParams(window.location.search);
+      const clienteId = urlParams.get('cliente');
+      
+      if (clienteId) {
+        // Esperar a que se carguen los clientes y luego filtrar
+        setTimeout(() => {
+          const clienteSelect = document.getElementById('clienteFilter');
+          const pageDescription = document.getElementById('pageDescription');
+          
+          if (clienteSelect) {
+            clienteSelect.value = clienteId;
+            filterMascotas();
+            
+            // Actualizar descripción de la página
+            const cliente = clientes.find(c => c.id == clienteId);
+            if (cliente && pageDescription) {
+              pageDescription.innerHTML = `
+                <i class="bi bi-funnel me-1"></i>
+                Mostrando mascotas de <strong>${cliente.nombre} ${cliente.apellido}</strong>
+                <button class="btn btn-sm btn-outline-secondary ms-2" onclick="limpiarFiltroCliente()">
+                  <i class="bi bi-x me-1"></i>Ver todas
+                </button>
+              `;
+            }
+          }
+        }, 500);
+      }
     }
 
     async function loadMascotas() {
@@ -510,6 +541,25 @@
       document.getElementById('especieFilter').value = '';
       document.getElementById('clienteFilter').value = '';
       document.getElementById('edadMin').value = '';
+      renderMascotas();
+    }
+
+    function limpiarFiltroCliente() {
+      // Limpiar el filtro de cliente
+      document.getElementById('clienteFilter').value = '';
+      
+      // Restaurar descripción original
+      const pageDescription = document.getElementById('pageDescription');
+      if (pageDescription) {
+        pageDescription.textContent = 'Administra la información de las mascotas';
+      }
+      
+      // Limpiar URL sin recargar la página
+      const url = new URL(window.location);
+      url.searchParams.delete('cliente');
+      window.history.replaceState({}, '', url);
+      
+      // Aplicar filtros
       renderMascotas();
     }
 

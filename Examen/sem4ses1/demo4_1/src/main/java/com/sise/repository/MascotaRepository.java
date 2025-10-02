@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Repository
@@ -28,4 +29,7 @@ public interface MascotaRepository extends JpaRepository<Mascota, Long> {
     
     @Query("SELECT m.especie, COUNT(m) FROM Mascota m GROUP BY m.especie")
     List<Object[]> distribucionMascotas();
+    
+    @Query("SELECT COUNT(DISTINCT m.id) FROM Mascota m JOIN m.citas c WHERE c.fechaCita BETWEEN :fechaInicio AND :fechaFin")
+    Long contarMascotasAtendidasPorFecha(@Param("fechaInicio") LocalDateTime fechaInicio, @Param("fechaFin") LocalDateTime fechaFin);
 }

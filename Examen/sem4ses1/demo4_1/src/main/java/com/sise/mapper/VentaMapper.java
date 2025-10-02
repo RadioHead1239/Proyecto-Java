@@ -1,8 +1,13 @@
 package com.sise.mapper;
 
 import com.sise.dto.VentaDTO;
+import com.sise.dto.DetalleVentaDTO;
 import com.sise.model.Venta;
+import com.sise.model.DetalleVenta;
+import com.sise.model.Producto;
 import org.springframework.stereotype.Component;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Component
 public class VentaMapper {
@@ -38,6 +43,14 @@ public class VentaMapper {
             if (venta.getCita().getMascota() != null) {
                 dto.setMascota(venta.getCita().getMascota().getNombre());
             }
+        }
+        
+        // Mapear detalles de venta
+        if (venta.getDetalleVentas() != null && !venta.getDetalleVentas().isEmpty()) {
+            List<DetalleVentaDTO> detallesDTO = venta.getDetalleVentas().stream()
+                .map(this::detalleToDTO)
+                .collect(Collectors.toList());
+            dto.setDetalles(detallesDTO);
         }
         
         return dto;
@@ -76,5 +89,45 @@ public class VentaMapper {
         }
         
         return venta;
+    }
+    
+    public DetalleVentaDTO detalleToDTO(DetalleVenta detalle) {
+        if (detalle == null) return null;
+        
+        DetalleVentaDTO dto = new DetalleVentaDTO();
+        dto.setId(detalle.getId());
+        dto.setCantidad(detalle.getCantidad());
+        dto.setPrecioUnitario(detalle.getPrecioUnitario());
+        dto.setSubtotal(detalle.getSubtotal());
+        
+        if (detalle.getVenta() != null) {
+            dto.setIdVenta(detalle.getVenta().getId());
+        }
+        
+        if (detalle.getProducto() != null) {
+            dto.setIdProducto(detalle.getProducto().getId());
+            dto.setProducto(detalle.getProducto().getNombre());
+            dto.setImagen(detalle.getProducto().getImagen());
+        }
+        
+        return dto;
+    }
+    
+    public DetalleVenta detalleToEntity(DetalleVentaDTO dto) {
+        if (dto == null) return null;
+        
+        DetalleVenta detalle = new DetalleVenta();
+        detalle.setId(dto.getId());
+        detalle.setCantidad(dto.getCantidad());
+        detalle.setPrecioUnitario(dto.getPrecioUnitario());
+        detalle.setSubtotal(dto.getSubtotal());
+        
+        if (dto.getIdProducto() != null) {
+            Producto producto = new Producto();
+            producto.setId(dto.getIdProducto());
+            detalle.setProducto(producto);
+        }
+        
+        return detalle;
     }
 }
