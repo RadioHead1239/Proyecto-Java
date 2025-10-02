@@ -363,7 +363,7 @@
       try {
         const response = await fetch('/api/dashboard');
         dashboardData = await response.json();
-        console.log('Datos del dashboard cargados:', dashboardData); // Para debugging
+        console.log('Datos del dashboard cargados:', dashboardData);
         updateDashboardUI();
         updateIngresosChart();
       } catch (error) {
@@ -392,7 +392,7 @@
       if (ingresosHoy) {
         const ingresos = dashboardData.ingresosHoy || 0;
         ingresosHoy.textContent = formatCurrency(ingresos);
-        console.log('Ingresos del día:', ingresos); // Para debugging
+        console.log('Ingresos del día:', ingresos);
       }
 
       
@@ -408,7 +408,6 @@
     }
 
 
-    // Obtener clase de badge para estado
     function getEstadoBadgeClass(estado) {
       switch(estado?.toLowerCase()) {
         case 'pendiente': return 'bg-warning';
@@ -419,7 +418,6 @@
       }
     }
 
-    // Formatear fecha y hora
     function formatDateTime(dateTime) {
       if (!dateTime) return 'N/A';
       const date = new Date(dateTime);
@@ -431,14 +429,12 @@
       });
     }
 
-    // Actualizar gráfico de distribución de mascotas
     function updateMascotasChart() {
       if (!dashboardData.distribucionMascotas) return;
       
       const distribucion = dashboardData.distribucionMascotas;
-      console.log('Distribución de mascotas recibida:', distribucion); // Para debugging
+      console.log('Distribución de mascotas recibida:', distribucion);
       
-      // Procesar datos de distribución
       const labels = [];
       const data = [];
       const colors = ['#667eea', '#f093fb', '#4facfe', '#43e97b', '#f5576c'];
@@ -450,18 +446,15 @@
         }
       });
       
-      console.log('Datos procesados:', { labels, data }); // Para debugging
+      console.log('Datos procesados:', { labels, data });
       
-      // Si no hay datos, usar valores por defecto
       if (labels.length === 0) {
         labels.push('Perros', 'Gatos', 'Otros');
         data.push(0, 0, 0);
       }
       
-      // Crear o actualizar el gráfico
       const ctx = document.getElementById('mascotasChart');
       if (ctx) {
-        // Destruir gráfico existente si existe
         if (mascotasChart) {
           mascotasChart.destroy();
         }
@@ -496,14 +489,12 @@
       }
     }
 
-    // Actualizar gráfico de ingresos semanales
     function updateIngresosChart() {
       if (!dashboardData.ingresosSemanales) return;
       
       const ingresos = dashboardData.ingresosSemanales;
-      console.log('Ingresos semanales recibidos:', ingresos); // Para debugging
+      console.log('Ingresos semanales recibidos:', ingresos);
       
-      // Crear array de 7 días con ingresos
       const ultimos7Dias = [];
       const ingresosData = [];
       
@@ -512,19 +503,16 @@
         fecha.setDate(fecha.getDate() - i);
         ultimos7Dias.push(fecha.toLocaleDateString('es-ES', { weekday: 'short' }));
         
-        // Buscar ingresos para esta fecha
         const fechaStr = fecha.toISOString().split('T')[0];
         const ingresoDia = ingresos.find(ing => {
-          // Manejar diferentes formatos de fecha
           const ingresoFecha = new Date(ing.fecha).toISOString().split('T')[0];
           return ingresoFecha === fechaStr;
         });
         ingresosData.push(ingresoDia ? ingresoDia.total : 0);
       }
       
-      console.log('Datos del gráfico:', { ultimos7Dias, ingresosData }); // Para debugging
+      console.log('Datos del gráfico:', { ultimos7Dias, ingresosData });
       
-      // Actualizar el gráfico si ya existe
       const chartCanvas = document.getElementById('ingresosChart');
       if (chartCanvas && window.ingresosChart) {
         window.ingresosChart.data.labels = ultimos7Dias;
@@ -533,24 +521,19 @@
       }
     }
 
-    // Función para filtrar por fecha y actualizar estadísticas
     async function filtrarPorFecha(fecha) {
       try {
-        console.log('Filtrando por fecha:', fecha); // Debug
+        console.log('Filtrando por fecha:', fecha);
         
-        // Obtener estadísticas del día
         const responseEstadisticas = await fetch(`/api/dashboard/estadisticas?fecha=${fecha}`);
         const estadisticas = await responseEstadisticas.json();
         
-        console.log('Estadísticas recibidas:', estadisticas); // Debug
+        console.log('Estadísticas recibidas:', estadísticas);
         
-        // Actualizar las estadísticas principales
         actualizarEstadisticas(estadisticas);
         
-        // Mostrar ventas filtradas
         mostrarVentasFiltradas(estadisticas.ultimasVentas || [], fecha);
         
-        // Mostrar citas filtradas
         mostrarCitasFiltradas(estadisticas.proximasCitas || [], fecha);
         
       } catch (error) {
@@ -560,7 +543,6 @@
       }
     }
 
-    // Función para mostrar las ventas filtradas
     function mostrarVentasFiltradas(ventas, fecha) {
       const ventasContainer = document.getElementById('ventasFiltradas');
       const ventasDelDia = document.getElementById('ventasDelDia');
@@ -592,7 +574,6 @@
       ventasContainer.style.display = 'block';
     }
 
-    // Función para mostrar las citas filtradas
     function mostrarCitasFiltradas(citas, fecha) {
       const citasContainer = document.getElementById('citasDelDia');
       
@@ -617,11 +598,9 @@
       }
     }
 
-    // Función para actualizar las estadísticas principales
     function actualizarEstadisticas(estadisticas) {
       console.log('Actualizando estadísticas con:', estadisticas);
       
-      // Usar IDs únicos para mayor precisión
       const totalClientes = document.getElementById('totalClientes');
       const totalMascotas = document.getElementById('totalMascotas');
       const citasHoy = document.getElementById('citasHoy');
@@ -652,7 +631,6 @@
         console.log('Ingresos actualizados a:', ingresos, 'formateado como:', formatCurrency(ingresos));
       }
 
-      // Actualizar etiquetas para indicar que son datos filtrados
       const labelClientes = document.getElementById('labelClientes');
       const labelMascotas = document.getElementById('labelMascotas');
       const labelCitas = document.getElementById('labelCitas');
@@ -664,12 +642,10 @@
       if (labelIngresos) labelIngresos.textContent = 'Ingresos del Día';
     }
 
-    // Función para limpiar filtro
     function limpiarFiltro() {
       document.getElementById('fechaFiltro').value = '';
       document.getElementById('ventasFiltradas').style.display = 'none';
       
-      // Restaurar etiquetas originales
       const labelClientes = document.getElementById('labelClientes');
       const labelMascotas = document.getElementById('labelMascotas');
       const labelCitas = document.getElementById('labelCitas');
@@ -680,19 +656,15 @@
       if (labelCitas) labelCitas.textContent = 'Citas Hoy';
       if (labelIngresos) labelIngresos.textContent = 'Ingresos del Día';
       
-      // Recargar datos del dashboard original
       loadDashboardData();
     }
 
     document.addEventListener("DOMContentLoaded", () => {
-      // Cargar datos del dashboard
       loadDashboardData();
 
-      // Configurar fecha por defecto (hoy)
       const hoy = new Date().toISOString().split('T')[0];
       document.getElementById('fechaFiltro').value = hoy;
 
-      // Event listeners para filtro de fecha
       document.getElementById('btnFiltrar').addEventListener('click', () => {
         const fecha = document.getElementById('fechaFiltro').value;
         if (fecha) {
@@ -702,10 +674,8 @@
 
       document.getElementById('btnLimpiar').addEventListener('click', limpiarFiltro);
 
-      // Filtrar automáticamente al cargar la página
       filtrarPorFecha(hoy);
 
-      // Ingresos Chart
       window.ingresosChart = new Chart(document.getElementById('ingresosChart'), {
         type: 'line',
         data: {
@@ -732,7 +702,6 @@
         }
       });
 
-      // Mascotas Chart - solo si no hay datos de la API
       if (!dashboardData || !dashboardData.distribucionMascotas) {
         mascotasChart = new Chart(document.getElementById('mascotasChart'), {
           type: 'doughnut',
@@ -751,7 +720,6 @@
           }
         });
       } else {
-        // Si hay datos de la API, actualizar el gráfico
         updateMascotasChart();
       }
     });

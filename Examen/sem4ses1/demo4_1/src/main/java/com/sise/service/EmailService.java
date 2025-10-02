@@ -35,11 +35,8 @@ public class EmailService {
             helper.setTo(to);
             helper.setSubject(subject);
             
-            // Contenido HTML
             String htmlContent = crearContenidoHTML(venta);
             helper.setText(htmlContent, true);
-            
-            // Adjuntar PDF
             byte[] pdfBytes = java.util.Base64.getDecoder().decode(pdfBase64);
             System.out.println("PDF Bytes length: " + pdfBytes.length);
             helper.addAttachment(pdfName, new ByteArrayResource(pdfBytes), "application/pdf");

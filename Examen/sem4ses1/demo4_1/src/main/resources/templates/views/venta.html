@@ -344,17 +344,15 @@
       const select = document.getElementById('idCliente');
       select.innerHTML = '<option value="">Seleccionar cliente</option>';
       
-      // Buscar cliente público para ponerlo primero
       const clientePublico = clientes.find(c => c.nombre === 'Público en' && c.apellido === 'General');
       if (clientePublico) {
         const option = document.createElement('option');
         option.value = clientePublico.id;
         option.textContent = `${clientePublico.nombre} ${clientePublico.apellido}`;
-        option.selected = true; // Seleccionar por defecto
+        option.selected = true;
         select.appendChild(option);
       }
       
-      // Agregar el resto de clientes
       clientes.forEach(cliente => {
         if (!(cliente.nombre === 'Público en' && cliente.apellido === 'General')) {
           const option = document.createElement('option');
@@ -398,7 +396,6 @@
       const cantidad = parseInt(document.getElementById('cantidadInput').value) || 0;
       const precio = parseFloat(document.getElementById('precioInput').value) || 0;
       const subtotal = cantidad * precio;
-      // Aquí podrías mostrar el subtotal si quisieras
     }
 
     function agregarProducto() {
@@ -419,7 +416,6 @@
         return;
       }
 
-      // Verificar si el producto ya está en la lista
       const productoExistente = productosVenta.find(p => p.id === productoId);
       if (productoExistente) {
         productoExistente.cantidad += cantidad;
@@ -667,7 +663,6 @@
         document.getElementById('idCliente').value = venta.idCliente;
         document.getElementById('estado').value = venta.estado;
         
-        // Cargar productos de la venta
         productosVenta = [];
         if (venta.detalles && venta.detalles.length > 0) {
           venta.detalles.forEach(detalle => {
@@ -700,14 +695,12 @@
           return;
         }
 
-        // Obtener detalles completos de la venta
         const response = await fetch(`/api/ventas/${id}`);
         if (!response.ok) throw new Error('Error al cargar detalles de la venta');
         
         const ventaCompleta = await response.json();
         console.log('Venta completa cargada:', ventaCompleta);
         
-        // Generar PDF en formato A4 profesional
         console.log('Generando factura A4...');
         generarPDFVentaA4(ventaCompleta);
         
@@ -717,24 +710,20 @@
       }
     }
 
-    // Función para generar PDF de venta en formato A4 profesional
     async function generarPDFVentaA4(venta) {
       try {
         const { jsPDF } = window.jspdf;
         const doc = new jsPDF();
 
-        // Configuración de colores
-        const primaryColor = [25, 25, 112]; // Azul oscuro
-        const secondaryColor = [70, 130, 180]; // Azul acero
+        const primaryColor = [25, 25, 112];
+        const secondaryColor = [70, 130, 180];
         const textColor = [51, 51, 51];
         const lightGray = [245, 245, 245];
         const darkGray = [64, 64, 64];
 
-        // Encabezado con logo y título
         doc.setFillColor(...primaryColor);
         doc.rect(0, 0, 210, 25, 'F');
 
-        // Logo (cruz médica)
         doc.setFillColor(255, 255, 255);
         doc.rect(15, 5, 8, 8, 'F');
         doc.setFillColor(...primaryColor);
@@ -742,13 +731,11 @@
         doc.setFillColor(255, 255, 255);
         doc.rect(18, 8, 2, 2, 'F');
 
-        // Título FACTURA
         doc.setTextColor(255, 255, 255);
         doc.setFontSize(24);
         doc.setFont('helvetica', 'bold');
         doc.text('COMPROBANTE DE PAGO', 30, 15);
 
-        // Información de la empresa
         doc.setTextColor(...textColor);
         doc.setFontSize(10);
         doc.setFont('helvetica', 'normal');
@@ -757,8 +744,7 @@
         doc.text('Av. Javier Prado Este 123, San Isidro, Lima', 20, 45);
         doc.text('Tel: (01) 234-5678 | Email: info@vetcare.com', 20, 50);
 
-        // Información del comprobante (centrado)
-        const infoX = 105; // centro aproximado de la hoja A4
+        const infoX = 105;
         doc.setFontSize(12);
         doc.setFont('helvetica', 'bold');
         doc.text(`N° Comprobante: ${venta.id}`, infoX, 35);
@@ -772,13 +758,10 @@
         doc.text(`Cliente: ${venta.cliente || 'Público en General'}`, infoX, 45);
         doc.text(`Estado: ${venta.estado}`, infoX, 50);
 
-        // Línea separadora
         doc.setDrawColor(...primaryColor);
         doc.setLineWidth(1);
         doc.line(20, 55, 190, 55);
 
-        // Tabla de productos
-        // Título centrado de la sección
         doc.setFontSize(14);
         doc.setFont('helvetica', 'bold');
         doc.setTextColor(...textColor);
@@ -789,7 +772,6 @@
         doc.setFillColor(...lightGray);
         doc.rect(tableStartX, 70, tableWidth, 10, 'F');
 
-        // Columnas
         const conceptoX = 10;
         const cantidadX = 100;
         const precioX = 120; 
@@ -803,7 +785,6 @@
         doc.text('TOTAL', totalX, 77);
 
 
-        // Detalles de la tabla
         let yPosition = 85;
         let subtotal = 0;
         const iva = 0.18;
@@ -1079,7 +1060,6 @@
           return;
         }
 
-        // Obtener detalles completos de la venta
         const response = await fetch(`/api/ventas/${id}`);
         if (!response.ok) throw new Error('Error al cargar detalles de la venta');
         
