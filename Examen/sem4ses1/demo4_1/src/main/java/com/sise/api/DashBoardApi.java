@@ -29,7 +29,6 @@ public class DashBoardApi {
     @GetMapping("/api/dashboard/ventas")
     public List<VentaDTO> getVentasPorFecha(@RequestParam String fecha) {
         System.out.println("API - Fecha recibida para ventas: " + fecha);
-        // Parsear la fecha directamente sin conversión de zona horaria
         LocalDate fechaFiltro = LocalDate.parse(fecha);
         System.out.println("API - Fecha parseada: " + fechaFiltro);
         return dashboardService.getVentasPorFecha(fechaFiltro);
@@ -38,7 +37,6 @@ public class DashBoardApi {
     @GetMapping("/api/dashboard/citas")
     public List<CitaDTO> getCitasPorFecha(@RequestParam String fecha) {
         System.out.println("API - Fecha recibida para citas: " + fecha);
-        // Parsear la fecha directamente sin conversión de zona horaria
         LocalDate fechaFiltro = LocalDate.parse(fecha);
         System.out.println("API - Fecha parseada: " + fechaFiltro);
         return dashboardService.getCitasPorFecha(fechaFiltro);
@@ -47,7 +45,6 @@ public class DashBoardApi {
     @GetMapping("/api/dashboard/estadisticas")
     public DashboardDTO getEstadisticasPorFecha(@RequestParam String fecha) {
         System.out.println("API - Fecha recibida para estadísticas: " + fecha);
-        // Parsear la fecha directamente sin conversión de zona horaria
         LocalDate fechaFiltro = LocalDate.parse(fecha);
         System.out.println("API - Fecha parseada: " + fechaFiltro);
         return dashboardService.getEstadisticasPorFecha(fechaFiltro);

@@ -530,6 +530,11 @@
                 <button class="btn btn-outline-info" onclick="verDetalles(${cita.id})" title="Ver detalles">
                   <i class="bi bi-eye"></i>
                 </button>
+                ${cita.estado === 'Completada' ? `
+                <button class="btn btn-outline-success" onclick="enviarWhatsApp(${cita.id})" title="Enviar WhatsApp">
+                  <i class="bi bi-whatsapp"></i>
+                </button>
+                ` : ''}
                 <button class="btn btn-outline-danger" onclick="eliminarCita(${cita.id})" title="Eliminar">
                   <i class="bi bi-trash"></i>
                 </button>
@@ -673,7 +678,6 @@
       document.getElementById('modalTitle').textContent = 'Nueva Cita';
       document.getElementById('formCita').reset();
       
-      // Establecer fecha mínima para nuevas citas
       const fechaInput = document.getElementById('fecha');
       const today = new Date().toISOString().split('T')[0];
       fechaInput.setAttribute('min', today);
@@ -700,7 +704,6 @@
       document.getElementById('observaciones').value = cita.observaciones || '';
       updatePrecio();
       
-      // Para editar, permitir cualquier fecha (remover restricción min)
       const fechaInput = document.getElementById('fecha');
       fechaInput.removeAttribute('min');
       
@@ -751,6 +754,72 @@
           console.error('Error:', error);
           showError('Error al eliminar la cita');
         }
+      }
+    }
+
+    async function enviarWhatsApp(id) {
+      const cita = citas.find(c => c.id === id);
+      if (!cita) return;
+
+      const telefonoCliente = cita.telefonoCliente || '';
+      
+      if (!telefonoCliente) {
+        showWarning('No se encontró número de teléfono del cliente');
+        return;
+      }
+
+      const telefonoFormateado = telefonoCliente.replace(/[^\d]/g, '');
+      
+      let numeroWhatsApp = telefonoFormateado;
+      if (!telefonoFormateado.startsWith('51')) {
+        numeroWhatsApp = '51' + telefonoFormateado;
+      }
+
+      const fechaCita = new Date(cita.fechaCita).toLocaleDateString('es-ES', {
+        weekday: 'long',
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+
+      let mensaje = `¡Hola ${cita.cliente}! \n\n`;
+      mensaje += `Tu servicio de *${cita.servicio}* para ${cita.mascota} está listo. \n\n`;
+      mensaje += ` Fecha del servicio: ${fechaCita}\n`;
+      mensaje += ` Precio: S/ ${cita.precioServicio}\n\n`;
+      
+      if (cita.observaciones) {
+        mensaje += ` Observaciones: ${cita.observaciones}\n\n`;
+      }
+      
+      mensaje += `¡Gracias por confiar en VetCare! \n`;
+      mensaje += `Puedes pasar a recoger a tu mascota cuando gustes.`;
+
+      const result = await Swal.fire({
+        title: 'Enviar WhatsApp',
+        html: `
+          <div class="text-start">
+            <p><strong>Cliente:</strong> ${cita.cliente}</p>
+            <p><strong>Teléfono:</strong> ${telefonoCliente}</p>
+            <p><strong>Mensaje:</strong></p>
+            <div class="border p-3 rounded bg-light" style="white-space: pre-line; font-size: 0.9rem;">${mensaje}</div>
+          </div>
+        `,
+        showCancelButton: true,
+        confirmButtonText: 'Enviar WhatsApp',
+        cancelButtonText: 'Cancelar',
+        confirmButtonColor: '#25D366',
+        width: '600px'
+      });
+
+      if (result.isConfirmed) {
+        const mensajeCodificado = encodeURIComponent(mensaje);
+        const urlWhatsApp = `https://wa.me/${numeroWhatsApp}?text=${mensajeCodificado}`;
+        
+        window.open(urlWhatsApp, '_blank');
+        
+        showSuccess('WhatsApp abierto. El mensaje está listo para enviar.');
       }
     }
 

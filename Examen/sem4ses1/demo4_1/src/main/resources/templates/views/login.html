@@ -21,8 +21,23 @@
       overflow: hidden;
     }
     .login-left {
-      background: url('https://images.unsplash.com/photo-1601758123927-1975a5e2b94c?q=80&w=1000') center/cover no-repeat;
       min-height: 100%;
+      padding: 0;
+      overflow: hidden;
+      position: relative;
+    }
+    .login-left::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.4);
+      z-index: 1;
+    }
+    .login-left .position-absolute {
+      z-index: 2;
     }
     .login-right {
       padding: 2rem;
@@ -65,7 +80,17 @@
       <div class="card login-card">
         <div class="row g-0">
           
-          <div class="col-md-5 d-none d-md-block login-left"></div>
+          <div class="col-md-5 d-none d-md-block login-left position-relative">
+            <img src="https://images.unsplash.com/photo-1601758123927-1975a5e2b94c?q=80&w=1000" 
+                 alt="Peluquería de Mascotas" 
+                 class="img-fluid h-100 w-100" 
+                 style="object-fit: cover;">
+            <div class="position-absolute top-50 start-50 translate-middle text-center text-white">
+              <i class="bi bi-scissors" style="font-size: 3rem; margin-bottom: 1rem;"></i>
+              <h3 class="fw-bold mb-2">VetCare</h3>
+              <p class="mb-0">Cuidando a tus mascotas con amor</p>
+            </div>
+          </div>
 
           
           <div class="col-md-7 d-flex align-items-center">

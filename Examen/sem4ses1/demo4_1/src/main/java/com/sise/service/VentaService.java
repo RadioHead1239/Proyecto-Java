@@ -53,9 +53,6 @@ public class VentaService implements IVentaService {
     @Override
     @Transactional
     public VentaDTO save(VentaDTO ventaDTO) {
-        // Si es una venta existente, verificar si cambió el estado
-        
-        // Validar stock solo si la venta está siendo completada
         if (ventaDTO.getEstado().equals("Completada") && ventaDTO.getDetalles() != null && !ventaDTO.getDetalles().isEmpty()) {
             for (DetalleVentaDTO detalle : ventaDTO.getDetalles()) {
                 Optional<Producto> productoOpt = productoRepository.findById(detalle.getIdProducto());
@@ -72,25 +69,17 @@ public class VentaService implements IVentaService {
         }
         
         Venta venta = ventaMapper.toEntity(ventaDTO);
-        
-        // Guardar la venta primero
         Venta savedVenta = ventaRepository.save(venta);
-        
-        // Procesar detalles de venta
         if (ventaDTO.getDetalles() != null && !ventaDTO.getDetalles().isEmpty()) {
-            // Si es una venta existente, eliminar detalles anteriores
             if (ventaDTO.getId() != null) {
                 List<DetalleVenta> detallesExistentes = detalleVentaRepository.findByVentaId(ventaDTO.getId());
                 detalleVentaRepository.deleteAll(detallesExistentes);
             }
             
             for (DetalleVentaDTO detalleDTO : ventaDTO.getDetalles()) {
-                // Crear y guardar el detalle de venta
                 DetalleVenta detalle = ventaMapper.detalleToEntity(detalleDTO);
                 detalle.setVenta(savedVenta);
                 detalleVentaRepository.save(detalle);
-                
-                // Actualizar stock del producto solo si la venta está completada
                 if (savedVenta.getEstado() == Venta.Estado.Completada) {
                     Optional<Producto> productoOpt = productoRepository.findById(detalleDTO.getIdProducto());
                     if (productoOpt.isPresent()) {
@@ -144,9 +133,6 @@ public class VentaService implements IVentaService {
         return total != null ? total : 0.0;
     }
     
-    /**
-     * Crea una venta automáticamente cuando una cita se completa
-     */
     public VentaDTO crearVentaDesdeCita(Cita cita) {
         Venta venta = new Venta();
         venta.setCliente(cita.getCliente());

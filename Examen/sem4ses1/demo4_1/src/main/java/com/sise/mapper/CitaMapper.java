@@ -19,6 +19,7 @@ public class CitaMapper {
         if (cita.getCliente() != null) {
             dto.setIdCliente(cita.getCliente().getId());
             dto.setCliente(cita.getCliente().getNombre() + " " + cita.getCliente().getApellido());
+            dto.setTelefonoCliente(cita.getCliente().getTelefono());
         }
         
         if (cita.getMascota() != null) {

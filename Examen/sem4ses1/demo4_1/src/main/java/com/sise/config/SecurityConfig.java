@@ -29,8 +29,8 @@ public class SecurityConfig {
             .userDetailsService(userDetailsService)
             .authorizeHttpRequests(authz -> authz
                 .requestMatchers("/", "/login", "/css/**", "/js/**", "/images/**", "/assets/**").permitAll()
-                .requestMatchers("/api/**").permitAll() // Temporal para desarrollo
-                .requestMatchers("/test").authenticated() // Para probar autenticación
+                .requestMatchers("/api/**").permitAll() 
+                .requestMatchers("/test").authenticated() 
                 .requestMatchers("/dashboard", "/cliente", "/mascota", "/cita", "/servicio", "/venta", "/producto", "/pago", "/usuario").hasAnyRole("Administrador", "Recepcionista", "Peluquero")
                 .requestMatchers("/usuario/**").hasRole("Administrador")
                 .anyRequest().authenticated()

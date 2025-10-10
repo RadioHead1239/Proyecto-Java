@@ -18,7 +18,6 @@
       --text-color: #ffffff;
     }
   
-    /* Sidebar */
     .sidebar {
       position: fixed;
       inset-block: 0;
@@ -33,7 +32,6 @@
       border-right: 3px solid rgba(255,255,255,0.1);
     }
   
-    /* Logo */
     .brand-logo {
       width: 90%;
       border-radius: 20px;
@@ -44,7 +42,6 @@
       transform: scale(1.05);
     }
   
-    /* Menú */
     .sidebar .nav-link {
       color: var(--text-color);
       border-radius: .6rem;
@@ -66,7 +63,6 @@
       box-shadow: 0 2px 8px rgba(0,0,0,.3);
     }
   
-    /* Footer */
     .sidebar-footer {
       padding: 1rem;
       font-size: .85rem;
@@ -80,7 +76,7 @@
     }
 
     .hero-section {
-      background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+      background: #84cddb;
       color: white;
       padding: 2rem 0;
       margin-bottom: 2rem;
@@ -217,7 +213,6 @@
     </section>
 
     <section class="container-fluid py-4">
-      <!-- Filtro de fecha -->
       <div class="row mb-4">
         <div class="col-12">
           <div class="card">
@@ -299,7 +294,6 @@
         </div>
       </div>
 
-      <!-- Ventas filtradas por fecha -->
       <div class="row g-4 mb-4" id="ventasFiltradas" style="display: none;">
         <div class="col-12">
           <div class="chart-container">
@@ -308,7 +302,6 @@
               <span class="badge bg-primary" id="fechaSeleccionada"></span>
             </div>
             <div id="ventasDelDia">
-              <!-- Las ventas se cargarán aquí dinámicamente -->
             </div>
           </div>
         </div>
@@ -344,7 +337,6 @@
               <a href="/cita" class="btn btn-outline-primary btn-sm"><i class="bi bi-plus"></i> Nueva Cita</a>
             </div>
             <div class="list-group list-group-flush" id="citasDelDia">
-              <!-- Las citas se cargarán aquí dinámicamente -->
             </div>
           </div>
         </div>
@@ -528,7 +520,7 @@
         const responseEstadisticas = await fetch(`/api/dashboard/estadisticas?fecha=${fecha}`);
         const estadisticas = await responseEstadisticas.json();
         
-        console.log('Estadísticas recibidas:', estadísticas);
+        console.log('Estadísticas recibidas:', estadisticas);
         
         actualizarEstadisticas(estadisticas);
         

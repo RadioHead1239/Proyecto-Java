@@ -16,6 +16,7 @@ public class CitaDTO {
     private String observaciones;
     private Long idCliente;
     private String cliente;
+    private String telefonoCliente;
     private Long idMascota;
     private String mascota;
     private Long idServicio;

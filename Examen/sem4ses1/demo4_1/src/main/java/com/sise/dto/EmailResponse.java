@@ -5,7 +5,6 @@ public class EmailResponse {
     private String message;
     private String error;
 
-    // Constructors
     public EmailResponse() {}
 
     public EmailResponse(boolean success, String message) {
@@ -19,7 +18,6 @@ public class EmailResponse {
         this.error = error;
     }
 
-    // Getters and Setters
     public boolean isSuccess() {
         return success;
     }

@@ -17,7 +17,12 @@ public class DashBoardController {
         this.dashboardService = dashboardService;
     }
 
-    @GetMapping({"/", "/index", "/dashboard"})
+    @GetMapping("/")
+    public String root() {
+        return "redirect:/login";
+    }
+
+    @GetMapping({"/index", "/dashboard"})
     public String index(HttpServletRequest request, Model model) {
         try {
             DashboardDTO dashboard = dashboardService.getDashboardData();

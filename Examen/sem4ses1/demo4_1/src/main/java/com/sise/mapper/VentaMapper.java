@@ -44,8 +44,6 @@ public class VentaMapper {
                 dto.setMascota(venta.getCita().getMascota().getNombre());
             }
         }
-        
-        // Mapear detalles de venta
         if (venta.getDetalleVentas() != null && !venta.getDetalleVentas().isEmpty()) {
             List<DetalleVentaDTO> detallesDTO = venta.getDetalleVentas().stream()
                 .map(this::detalleToDTO)

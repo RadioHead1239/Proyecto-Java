@@ -59,28 +59,15 @@ public class DashBoardService implements IDashBoardService {
         this.ventaMapper = ventaMapper;
     }
 
-    /**
-     * Convierte una LocalDate a LocalDateTime considerando la zona horaria de Lima
-     * para evitar problemas de UTC vs zona horaria local
-     */
     private LocalDateTime[] getRangoFechasConZonaHoraria(LocalDate fecha) {
-        // Crear el inicio del día en la zona horaria de Lima
         LocalDateTime inicio = fecha.atStartOfDay();
-        
-        // Crear el final del día en la zona horaria de Lima
         LocalDateTime fin = fecha.atTime(23, 59, 59, 999999999);
-        
-        // Convertir a ZonedDateTime para asegurar que se maneje en la zona horaria correcta
         ZonedDateTime inicioZoned = inicio.atZone(ZONE_LIMA);
         ZonedDateTime finZoned = fin.atZone(ZONE_LIMA);
-        
-        // Convertir de vuelta a LocalDateTime para la consulta
         LocalDateTime inicioLocal = inicioZoned.toLocalDateTime();
         LocalDateTime finLocal = finZoned.toLocalDateTime();
-        
         System.out.println("Fecha original: " + fecha);
         System.out.println("Rango con zona horaria Lima: " + inicioLocal + " - " + finLocal);
-        
         return new LocalDateTime[]{inicioLocal, finLocal};
     }
 
@@ -167,10 +154,8 @@ public class DashBoardService implements IDashBoardService {
 
     @Override
     public List<VentaDTO> getVentasPorFecha(LocalDate fecha) {
-        // Debug: Imprimir la fecha recibida
         System.out.println("Fecha recibida para ventas: " + fecha);
         
-        // Usar el helper para manejar correctamente la zona horaria
         LocalDateTime[] rango = getRangoFechasConZonaHoraria(fecha);
         LocalDateTime inicio = rango[0];
         LocalDateTime fin = rango[1];
@@ -183,7 +168,6 @@ public class DashBoardService implements IDashBoardService {
 
     @Override
     public List<CitaDTO> getCitasPorFecha(LocalDate fecha) {
-        // Usar el helper para manejar correctamente la zona horaria
         LocalDateTime[] rango = getRangoFechasConZonaHoraria(fecha);
         LocalDateTime inicio = rango[0];
         LocalDateTime fin = rango[1];
@@ -198,29 +182,23 @@ public class DashBoardService implements IDashBoardService {
     public DashboardDTO getEstadisticasPorFecha(LocalDate fecha) {
         DashboardDTO dto = new DashboardDTO();
         
-        // Debug: Imprimir la fecha recibida
         System.out.println("Fecha recibida para estadísticas: " + fecha);
         
-        // Usar el helper para manejar correctamente la zona horaria
         LocalDateTime[] rango = getRangoFechasConZonaHoraria(fecha);
         LocalDateTime inicio = rango[0];
         LocalDateTime fin = rango[1];
 
-        // Citas del día
         dto.setCitasHoy(citaRepo.countByFechaCitaBetween(inicio, fin));
 
-        // Ingresos del día (pagos + ventas) - sin filtrar por estado para debug
         Double ingresosPagos = pagoRepo.sumByFechaPagoBetween(inicio, fin);
         Double ingresosVentas = ventaRepo.sumarVentasPorPeriodo(inicio, fin);
         
-        // También probar sin filtro de estado
         List<Pago> pagosDelDia = pagoRepo.findByFechaPagoBetween(inicio, fin);
         List<Venta> ventasDelDia = ventaRepo.findByFechaBetween(inicio, fin);
         
         System.out.println("Pagos encontrados en el día: " + pagosDelDia.size());
         System.out.println("Ventas encontradas en el día: " + ventasDelDia.size());
         
-        // Calcular manualmente para debug
         double totalPagosManual = pagosDelDia.stream()
             .mapToDouble(p -> p.getMonto() != null ? p.getMonto().doubleValue() : 0.0)
             .sum();
@@ -236,7 +214,6 @@ public class DashBoardService implements IDashBoardService {
         
         double totalIngresos = 0.0;
         
-        // Usar los métodos con filtro de estado si devuelven valores, sino usar cálculo manual
         if (ingresosPagos != null && ingresosPagos > 0) {
             totalIngresos += ingresosPagos;
             System.out.println("Sumando pagos (con filtro): " + ingresosPagos);
@@ -260,21 +237,16 @@ public class DashBoardService implements IDashBoardService {
         
         System.out.println("Ingresos finales en DTO: " + ingresos);
 
-        // Mascotas atendidas del día
         Long mascotasAtendidas = mascotaRepo.contarMascotasAtendidasPorFecha(inicio, fin);
         dto.setTotalMascotas(mascotasAtendidas != null ? mascotasAtendidas : 0L);
 
-        // Clientes atendidos del día
         Long clientesAtendidos = clienteRepo.contarClientesAtendidosPorFecha(inicio, fin);
         dto.setTotalClientes(clientesAtendidos != null ? clientesAtendidos : 0L);
-
-        // Obtener citas del día
         dto.setProximasCitas(
             citaRepo.findByFechaCitaBetween(inicio, fin)
                 .stream().map(citaMapper::toDTO).collect(Collectors.toList())
         );
 
-        // Obtener ventas del día
         dto.setUltimasVentas(
             ventaRepo.findByFechaBetween(inicio, fin)
                 .stream().map(ventaMapper::toDTO).collect(Collectors.toList())

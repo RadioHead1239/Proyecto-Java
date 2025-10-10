@@ -7,10 +7,8 @@ public class EmailRequest {
     private String pdfBase64;
     private String pdfName;
 
-    // Constructors
     public EmailRequest() {}
 
-    // Getters and Setters
     public String getTo() {
         return to;
     }
@@ -51,7 +49,6 @@ public class EmailRequest {
         this.pdfName = pdfName;
     }
 
-    // Inner class for Venta info
     public static class VentaInfo {
         private Long id;
         private String fecha;
@@ -59,10 +56,8 @@ public class EmailRequest {
         private String estado;
         private Double total;
 
-        // Constructors
         public VentaInfo() {}
 
-        // Getters and Setters
         public Long getId() {
             return id;
         }
